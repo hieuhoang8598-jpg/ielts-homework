@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IELTS Homework Portal</title>
+<title>Mr Hieu's Classes</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#242424;--border:#2e2e2e;--accent:#c8f05a;--speaking:#5af0c8;--danger:#f05a5a;--text:#f0ede6;--muted:#7a7a7a}
@@ -164,7 +164,7 @@ textarea:focus{border-color:var(--accent)}
 <body>
 
 <header>
-  <div class="logo">IELTS <span>Homework</span></div>
+  <div class="logo">Mr Hieu's <span>Classes</span></div>
 </header>
 
 <main>
@@ -172,16 +172,19 @@ textarea:focus{border-color:var(--accent)}
 <!-- STEP 0: WELCOME -->
 <div class="step active" id="step-welcome">
   <div class="hero">
-    <h1>Nộp bài<br><em>thông minh hơn.</em></h1>
-    <p>Chọn đề, làm bài, nhận kết quả ngay theo chuẩn IELTS band descriptors.</p>
+    <h1>Automatic<br><em>Scoring System</em></h1>
+    <p>Dedicated to bring a smoother learning experience.</p>
   </div>
   <div class="box">
     <label>Gemini API Key</label>
-    <input type="password" id="apiKey" placeholder="AIza..." />
+    <input type="password" id="apiKey" placeholder="AIza..." oninput="saveApiKey()" />
     <p class="box-note">Key chỉ dùng trong session này — không lưu lại.</p>
   </div>
-  <div class="name-row">
+  <div class="name-row" style="max-width:480px;margin:0 auto .75rem">
     <input type="text" class="name-input" id="studentName" placeholder="Họ và tên của bạn..." maxlength="60" />
+  </div>
+  <div class="name-row">
+    <input type="text" class="name-input" id="classCode" placeholder="Mã lớp (ví dụ: IELTS-01)..." maxlength="30" />
     <button class="btn btn-p" onclick="startApp()">Bắt đầu →</button>
   </div>
   <div class="err" id="startErr"></div>
@@ -528,7 +531,7 @@ const SPEAKING_PROMPTS = [
 // STATE
 // ══════════════════════════════════════════════════════
 const S = {
-  name: '', apiKey: '', type: '',
+  name: '', apiKey: '', classCode: '', type: '',
   selectedWriting: null, selectedSpeaking: null,
   mediaRecorder: null, audioChunks: [], audioBlob: null,
   recInterval: null, recSeconds: 0, isRecording: false,
@@ -540,7 +543,11 @@ const S = {
 // INIT — Build prompt lists on load
 // ══════════════════════════════════════════════════════
 (function init() {
-  // Build writing list
+  // Load API key đã lưu (nếu có)
+  const savedKey = localStorage.getItem('gemini_api_key');
+  if (savedKey) {
+    document.getElementById('apiKey').value = savedKey;
+  }
   const wList = document.getElementById('writingList');
   WRITING_PROMPTS.forEach((p, i) => {
     const div = document.createElement('div');
@@ -580,15 +587,28 @@ function showStep(id) {
 }
 
 function startApp() {
-  const name = document.getElementById('studentName').value.trim();
-  const key  = document.getElementById('apiKey').value.trim();
-  const err  = document.getElementById('startErr');
+  const name  = document.getElementById('studentName').value.trim();
+  const key   = document.getElementById('apiKey').value.trim();
+  const code  = document.getElementById('classCode').value.trim();
+  const err   = document.getElementById('startErr');
+
   if (!name) { err.style.display='block'; err.textContent='Vui lòng nhập họ tên.'; return; }
   if (!key)  { err.style.display='block'; err.textContent='Vui lòng nhập API key.'; return; }
+  if (!code) { err.style.display='block'; err.textContent='Vui lòng nhập mã lớp.'; return; }
   err.style.display = 'none';
-  S.name = name; S.apiKey = key;
+
+  S.name = name; S.apiKey = key; S.classCode = code;
+  // Lưu API key vào localStorage để lần sau không cần nhập lại
+  localStorage.setItem('gemini_api_key', key);
+
   document.getElementById('greetName').textContent = name;
   showStep('choose');
+}
+
+// Lưu API key realtime khi gõ
+function saveApiKey() {
+  const key = document.getElementById('apiKey').value.trim();
+  if (key) localStorage.setItem('gemini_api_key', key);
 }
 
 function chooseType(type) {
@@ -757,7 +777,18 @@ async function startRec() {
       S.audioBlob = new Blob(S.audioChunks, { type: 'audio/webm' });
       document.getElementById('audioEl').src = URL.createObjectURL(S.audioBlob);
       document.getElementById('audioWrap').style.display = 'block';
-      document.getElementById('submitSpBtn').disabled = false;
+
+      // Kiểm tra thời gian tối thiểu (1 phút = 60 giây)
+      const MIN_SECONDS = 60;
+      if (S.recSeconds >= MIN_SECONDS) {
+        document.getElementById('submitSpBtn').disabled = false;
+        document.getElementById('recStatus').textContent = '✅ Ghi âm xong. Nhấn "Nộp & Chấm bài" để tiếp tục.';
+      } else {
+        const remaining = MIN_SECONDS - S.recSeconds;
+        document.getElementById('recStatus').textContent =
+          `⚠️ Bài nói quá ngắn (${S.recSeconds}s). Cần nói ít nhất ${MIN_SECONDS}s — còn thiếu ${remaining}s. Hãy ghi âm lại.`;
+        document.getElementById('submitSpBtn').disabled = true;
+      }
       if (!S.transcript) {
         document.getElementById('txBox').style.display = 'block';
         document.getElementById('txText').textContent = '(Không nhận dạng được — Claude sẽ chấm theo nội dung ghi âm)';
@@ -1053,6 +1084,7 @@ async function saveToSheet(r, type, promptTitle) {
   const payload = {
     timestamp:    new Date().toLocaleString('vi-VN'),
     name:         S.name,
+    class_code:   S.classCode,
     type:         type === 'writing' ? 'Writing' : 'Speaking',
     prompt_title: promptTitle || '',
     essay:        essay.substring(0, 5000),
