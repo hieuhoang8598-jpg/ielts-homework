@@ -178,7 +178,9 @@ textarea:focus{border-color:var(--accent)}
   <div class="box">
     <label>Gemini API Key</label>
     <input type="password" id="apiKey" placeholder="AIza..." oninput="saveApiKey()" onkeydown="if(event.key==='Enter')document.getElementById('studentName').focus()" />
-    <p class="box-note">Key chỉ dùng trong session này — không lưu lại.</p>
+    <input type="password" id="apiKey2" placeholder="API Key dự phòng 2 (không bắt buộc)..." style="margin-top:.5rem;opacity:.7" oninput="saveApiKey()" />
+    <input type="password" id="apiKey3" placeholder="API Key dự phòng 3 (không bắt buộc)..." style="margin-top:.5rem;opacity:.7" oninput="saveApiKey()" />
+    <p class="box-note">Thêm key dự phòng để tránh lỗi quota. Key không được lưu lại.</p>
   </div>
   <div class="name-row" style="max-width:480px;margin:0 auto .75rem">
     <input type="text" class="name-input" id="studentName" placeholder="Họ và tên của bạn..." maxlength="60" onkeydown="if(event.key==='Enter')document.getElementById('classCode').focus()" />
@@ -531,7 +533,7 @@ const SPEAKING_PROMPTS = [
 // STATE
 // ══════════════════════════════════════════════════════
 const S = {
-  name: '', apiKey: '', classCode: '', type: '',
+  name: '', apiKey: '', apiKey2: '', apiKey3: '', classCode: '', type: '',
   selectedWriting: null, selectedSpeaking: null,
   mediaRecorder: null, audioChunks: [], audioBlob: null,
   recInterval: null, recSeconds: 0, isRecording: false,
@@ -545,9 +547,11 @@ const S = {
 (function init() {
   // Load API key đã lưu (nếu có)
   const savedKey = localStorage.getItem('gemini_api_key');
-  if (savedKey) {
-    document.getElementById('apiKey').value = savedKey;
-  }
+  if (savedKey) document.getElementById('apiKey').value = savedKey;
+  const savedKey2 = localStorage.getItem('gemini_api_key2');
+  if (savedKey2) document.getElementById('apiKey2').value = savedKey2;
+  const savedKey3 = localStorage.getItem('gemini_api_key3');
+  if (savedKey3) document.getElementById('apiKey3').value = savedKey3;
   const wList = document.getElementById('writingList');
   WRITING_PROMPTS.forEach((p, i) => {
     const div = document.createElement('div');
@@ -598,6 +602,8 @@ function startApp() {
   err.style.display = 'none';
 
   S.name = name; S.apiKey = key; S.classCode = code;
+  S.apiKey2 = document.getElementById('apiKey2').value.trim();
+  S.apiKey3 = document.getElementById('apiKey3').value.trim();
   // Lưu API key vào localStorage để lần sau không cần nhập lại
   localStorage.setItem('gemini_api_key', key);
 
@@ -609,6 +615,10 @@ function startApp() {
 function saveApiKey() {
   const key = document.getElementById('apiKey').value.trim();
   if (key) localStorage.setItem('gemini_api_key', key);
+  const key2 = document.getElementById('apiKey2').value.trim();
+  if (key2) localStorage.setItem('gemini_api_key2', key2);
+  const key3 = document.getElementById('apiKey3').value.trim();
+  if (key3) localStorage.setItem('gemini_api_key3', key3);
 }
 
 function chooseType(type) {
@@ -901,41 +911,47 @@ async function submitSpeaking() {
 // CLAUDE API
 // ══════════════════════════════════════════════════════
 async function callClaude(system, user, maxTokens = 2500) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${S.apiKey}`;
-  const maxRetries = 3;
+  const keys = [S.apiKey, S.apiKey2, S.apiKey3].filter(Boolean);
+  let lastError = '';
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: system }] },
-        contents: [{ role: 'user', parts: [{ text: user }] }],
-        generationConfig: { maxOutputTokens: 8192, temperature: 0.3 },
-      }),
-    });
+  for (let ki = 0; ki < keys.length; ki++) {
+    const key = keys[ki];
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
 
-    if (!res.ok) {
-      let msg = `HTTP ${res.status}`;
-      try { const j = await res.json(); msg = j.error?.message || msg; } catch(_) {}
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: system }] },
+          contents: [{ role: 'user', parts: [{ text: user }] }],
+          generationConfig: { maxOutputTokens: 8192, temperature: 0.3 },
+        }),
+      });
 
-      // Nếu lỗi quá tải và còn lượt thử → đợi rồi thử lại
-      const isOverloaded = msg.includes('high demand') || msg.includes('overloaded') || msg.includes('quota') || res.status === 503 || res.status === 429;
-      if (isOverloaded && attempt < maxRetries) {
-        const waitSec = attempt * 5;
-        const ovMsg = document.getElementById('overlayMsg');
-        if (ovMsg) ovMsg.textContent = `Gemini đang bận — tự động thử lại sau ${waitSec}s... (lần ${attempt}/${maxRetries})`;
-        showOverlay(`Gemini đang bận — tự động thử lại sau ${waitSec}s...`);
-        await new Promise(r => setTimeout(r, waitSec * 1000));
-        continue;
+      if (!res.ok) {
+        let msg = `HTTP ${res.status}`;
+        try { const j = await res.json(); msg = j.error?.message || msg; } catch(_) {}
+        lastError = msg;
+
+        const isOverloaded = msg.includes('high demand') || msg.includes('overloaded') || res.status === 503;
+        const isQuota = msg.includes('quota') || res.status === 429;
+
+        if (isOverloaded && attempt < 2) {
+          showOverlay('Gemini đang bận — thử lại sau 5s...');
+          await new Promise(r => setTimeout(r, 5000));
+          continue;
+        }
+        if (isQuota) break; // thử key tiếp theo
+        throw new Error(msg);
       }
-      throw new Error(msg);
-    }
 
-    const data = await res.json();
-    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    return raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/,'').trim();
+      const data = await res.json();
+      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      return raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/,'').trim();
+    }
   }
+  throw new Error('Quota hết. Vui lòng thử lại sau 1 phút.');
 }
 
 async function gradeWriting(prompt, essay, taskType) {
