@@ -901,7 +901,7 @@ async function submitSpeaking() {
 // CLAUDE API
 // ══════════════════════════════════════════════════════
 async function callClaude(system, user, maxTokens = 2500) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${S.apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${S.apiKey}`;
   const maxRetries = 3;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
