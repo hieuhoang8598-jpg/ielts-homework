@@ -910,13 +910,16 @@ Respond ONLY with raw JSON, no markdown:
 }
 
 async function gradeSpeaking(prompt, transcript, part) {
-  const system = `You are an expert IELTS Speaking examiner. Grade according to official IELTS Speaking Band Descriptors (0-9, half-bands allowed).
-Note: Evaluating from transcript — fluency/pronunciation are approximate.
-All feedback in Vietnamese except quoted examples.
+  const system = `You are an IELTS Speaking examiner. Grade by official band descriptors (0-9, half-bands).
+Evaluating from transcript — fluency/pronunciation approximate.
+All feedback in Vietnamese. Be concise — max 2 sentences per field.
 
 Respond ONLY with raw JSON, no markdown:
-{"fluency_coherence":{"score":6.0,"strengths":[],"weaknesses":[],"descriptor_reason":"","to_next_band":""},"lexical_resource":{"score":6.5,"strengths":[],"weaknesses":[],"descriptor_reason":"","to_next_band":""},"grammatical_range":{"score":6.0,"strengths":[],"weaknesses":[],"descriptor_reason":"","to_next_band":""},"pronunciation":{"score":6.0,"strengths":[],"weaknesses":[],"descriptor_reason":"","to_next_band":""},"overall_band":6.0,"overall_feedback":"2-3 câu tiếng Việt","grammar_table":[{"structure":"","formula":"","error_example":"","correct_example":"","note":""}],"vocabulary":[{"word":"","meaning":"","example":"","note":""}],"top_improvements":[{"title":"","detail":"","fix":""}]}`;
-  return JSON.parse(await callClaude(system, `IELTS Speaking ${part} — Student: ${S.name}\n\nCUE CARD:\n${prompt}\n\nTRANSCRIPT:\n${transcript}`));
+{"fluency_coherence":{"score":6.0,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"lexical_resource":{"score":6.5,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"grammatical_range":{"score":6.0,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"pronunciation":{"score":6.0,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"overall_band":6.0,"overall_feedback":"2 câu tiếng Việt","grammar_table":[{"structure":"...","formula":"...","error_example":"...","correct_example":"...","note":"..."}],"vocabulary":[{"word":"...","meaning":"...","example":"...","note":"..."}],"top_improvements":[{"title":"...","detail":"...","fix":"..."}]}`;
+
+  // Limit transcript to 1500 chars to avoid overflow
+  const tx = transcript.substring(0, 1500);
+  return JSON.parse(await callClaude(system, `IELTS Speaking ${part} — Student: ${S.name}\n\nCUE CARD:\n${prompt}\n\nTRANSCRIPT:\n${tx}`));
 }
 
 // ══════════════════════════════════════════════════════
