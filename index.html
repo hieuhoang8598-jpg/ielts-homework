@@ -901,7 +901,7 @@ async function submitSpeaking() {
 // CLAUDE API
 // ══════════════════════════════════════════════════════
 async function callClaude(system, user, maxTokens = 2500) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${S.apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${S.apiKey}`;
   const maxRetries = 3;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -920,7 +920,7 @@ async function callClaude(system, user, maxTokens = 2500) {
       try { const j = await res.json(); msg = j.error?.message || msg; } catch(_) {}
 
       // Nếu lỗi quá tải và còn lượt thử → đợi rồi thử lại
-      const isOverloaded = msg.includes('high demand') || msg.includes('overloaded') || res.status === 503 || res.status === 429;
+      const isOverloaded = msg.includes('high demand') || msg.includes('overloaded') || msg.includes('quota') || res.status === 503 || res.status === 429;
       if (isOverloaded && attempt < maxRetries) {
         const waitSec = attempt * 5;
         const ovMsg = document.getElementById('overlayMsg');
