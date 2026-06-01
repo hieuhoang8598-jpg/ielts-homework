@@ -923,21 +923,20 @@ async function callClaude(system, user, maxTokens = 2500) {
 
 async function gradeWriting(prompt, essay, taskType) {
   const isT1 = taskType && taskType.includes('1');
-  const c1 = isT1 ? 'task_achievement' : 'task_response';
-  const c1L = isT1 ? 'Task Achievement' : 'Task Response';
-  const system = `You are an expert IELTS Writing examiner. Grade strictly according to official IELTS Writing Band Descriptors (0-9, half-bands allowed).
+  const c1   = isT1 ? 'task_achievement' : 'task_response';
+  const system = `You are an IELTS Writing examiner. Grade by official band descriptors (0-9, half-bands).
+Rules: fully fit positive features at band; negative features LIMIT score; uncertain → choose LOWER band.
+Min words: Task 1=150, Task 2=250. Penalize if underlength.
+All feedback in Vietnamese. Be concise — max 2 sentences per field.
 
-Key rules:
-- A script must FULLY FIT positive features at that band
-- Negative/bolded features LIMIT the score
-- When uncertain between two bands, choose the LOWER one
-- Minimum words: Task 1 = 150, Task 2 = 250. Penalize if underlength.
-- All feedback text must be in Vietnamese (except quoted examples from the essay)
+IMPORTANT for top_improvements: You MUST quote the exact sentence from the student's essay, then show the corrected version. Never give general advice without a specific example from the essay.
 
 Respond ONLY with raw JSON, no markdown:
-{"${c1}":{"score":6.5,"strengths":["specific point with quote"],"weaknesses":["specific point with fix"],"descriptor_reason":"why this score not higher — cite descriptor","to_next_band":"one specific action"},"coherence_cohesion":{"score":6.0,"strengths":[],"weaknesses":[],"descriptor_reason":"","to_next_band":""},"lexical_resource":{"score":6.5,"strengths":[],"weaknesses":[],"descriptor_reason":"","to_next_band":""},"grammatical_range":{"score":6.0,"strengths":[],"weaknesses":[],"descriptor_reason":"","to_next_band":""},"overall_band":6.5,"overall_feedback":"2-3 câu tiếng Việt tóm tắt chất lượng bài","word_count_note":"e.g. 267 từ — đạt yêu cầu","grammar_table":[{"structure":"tên cấu trúc","formula":"S+V+O","error_example":"trích từ bài","correct_example":"câu đã sửa","note":"giải thích tiếng Việt"}],"vocabulary":[{"word":"từ/cụm từ","meaning":"nghĩa tiếng Việt","example":"câu ví dụ","note":"ghi chú sử dụng"}],"top_improvements":[{"title":"tên vấn đề","detail":"giải thích tiếng Việt","fix":"ví dụ câu sửa"}]}`;
-  const wc = essay.trim().split(/\s+/).length;
-  return JSON.parse(await callClaude(system, `IELTS Writing ${taskType} — Student: ${S.name} — Word count: ~${wc}\n\nPROMPT:\n${prompt}\n\nESSAY:\n${essay}`));
+{"${c1}":{"score":6.5,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"coherence_cohesion":{"score":6.0,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"lexical_resource":{"score":6.5,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"grammatical_range":{"score":6.0,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"overall_band":6.5,"overall_feedback":"2 câu tiếng Việt","word_count_note":"...","grammar_table":[{"structure":"...","formula":"...","error_example":"exact quote from essay","correct_example":"corrected version","note":"giải thích tiếng Việt"}],"vocabulary":[{"word":"...","meaning":"...","example":"...","note":"..."}],"top_improvements":[{"title":"...","detail":"lý do cụ thể tiếng Việt","original":"câu gốc từ bài học viên","fix":"câu đã sửa hoàn chỉnh"}]}`;
+  const wc  = essay.trim().split(/\s+/).length;
+  // Limit essay to 2000 chars to avoid overflow
+  const essayTrimmed = essay.substring(0, 2000);
+  return JSON.parse(await callClaude(system, `IELTS Writing ${taskType} — Student: ${S.name} — ~${wc} words\n\nPROMPT:\n${prompt}\n\nESSAY:\n${essayTrimmed}`));
 }
 
 async function gradeSpeaking(prompt, transcript, part) {
@@ -978,10 +977,17 @@ function renderResults(r, type) {
   }).join('');
 
   const imps = (r.top_improvements||[]).map((imp,i)=>`
-    <div style="margin-bottom:.8rem;padding-bottom:.8rem;border-bottom:1px solid var(--border)">
-      <div style="font-weight:600;font-size:.82rem;margin-bottom:.25rem">${i+1}. ${imp.title}</div>
-      <div style="font-size:.79rem;color:var(--muted);margin-bottom:.25rem;line-height:1.6">${imp.detail}</div>
-      ${imp.fix?`<div style="font-size:.78rem;background:var(--surface2);border-radius:5px;padding:.4rem .6rem;font-family:'DM Mono',monospace;color:${accent}">${imp.fix}</div>`:''}
+    <div style="margin-bottom:.9rem;padding-bottom:.9rem;border-bottom:1px solid var(--border)">
+      <div style="font-weight:600;font-size:.84rem;margin-bottom:.3rem">${i+1}. ${imp.title}</div>
+      <div style="font-size:.81rem;color:var(--muted);margin-bottom:.5rem;line-height:1.6">${imp.detail}</div>
+      ${imp.original ? `<div style="font-size:.79rem;margin-bottom:.3rem">
+        <span style="font-family:'DM Mono',monospace;font-size:.68rem;color:var(--danger);text-transform:uppercase;letter-spacing:.06em">Câu gốc</span><br>
+        <span style="background:rgba(240,90,90,.1);border-left:2px solid var(--danger);padding:.35rem .6rem;display:block;margin-top:.25rem;border-radius:0 4px 4px 0;font-style:italic;color:#f0c0c0">${imp.original}</span>
+      </div>` : ''}
+      ${imp.fix ? `<div style="font-size:.79rem">
+        <span style="font-family:'DM Mono',monospace;font-size:.68rem;color:var(--accent);text-transform:uppercase;letter-spacing:.06em">Câu sửa</span><br>
+        <span style="background:rgba(200,240,90,.08);border-left:2px solid var(--accent);padding:.35rem .6rem;display:block;margin-top:.25rem;border-radius:0 4px 4px 0;font-family:'DM Mono',monospace;color:var(--accent)">${imp.fix}</span>
+      </div>` : ''}
     </div>`).join('');
 
   const gramRows = (r.grammar_table||[]).filter(g=>g.structure).map(g=>`<tr>
