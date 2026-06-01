@@ -922,8 +922,10 @@ async function callClaude(system, user, maxTokens = 2500) {
       // Nếu lỗi quá tải và còn lượt thử → đợi rồi thử lại
       const isOverloaded = msg.includes('high demand') || msg.includes('overloaded') || res.status === 503 || res.status === 429;
       if (isOverloaded && attempt < maxRetries) {
-        const waitSec = attempt * 5; // lần 1: 5s, lần 2: 10s
-        document.getElementById('overlayMsg').textContent = `Gemini đang bận — tự động thử lại sau ${waitSec}s... (lần ${attempt}/${maxRetries})`;
+        const waitSec = attempt * 5;
+        const ovMsg = document.getElementById('overlayMsg');
+        if (ovMsg) ovMsg.textContent = `Gemini đang bận — tự động thử lại sau ${waitSec}s... (lần ${attempt}/${maxRetries})`;
+        showOverlay(`Gemini đang bận — tự động thử lại sau ${waitSec}s...`);
         await new Promise(r => setTimeout(r, waitSec * 1000));
         continue;
       }
