@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IELTS Homework Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0f0f;--surface:#1a1a1a;--surface2:#242424;--border:#2e2e2e;--accent:#c8f05a;--speaking:#5af0c8;--danger:#f05a5a;--text:#f0ede6;--muted:#7a7a7a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{padding:1.2rem 2rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;background:rgba(15,15,15,.95);backdrop-filter:blur(8px)}
+.logo{font-family:'Playfair Display',serif;font-size:1.2rem}.logo span{color:var(--accent)}
+main{max-width:780px;margin:0 auto;padding:2.5rem 1.5rem 6rem}
+.step{display:none}.step.active{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.dots{display:flex;gap:.45rem;justify-content:center;margin-bottom:2.5rem}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:background .3s}
+.dot.done{background:#444}.dot.active{background:var(--accent)}
+
+/* WELCOME */
+.hero{text-align:center;padding:3rem 0 2rem}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,5vw,3rem);line-height:1.1;margin-bottom:.8rem}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero p{color:var(--muted);max-width:400px;margin:0 auto 2.5rem;line-height:1.7;font-size:.92rem}
+.box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.3rem;margin-bottom:.9rem;max-width:480px;margin-left:auto;margin-right:auto}
+.box label{display:block;font-family:'DM Mono',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.45rem}
+.box input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:.65rem .9rem;color:var(--text);font-family:'DM Mono',monospace;font-size:.8rem;outline:none;transition:border-color .2s}
+.box input:focus{border-color:var(--accent)}
+.box input::placeholder{color:#444}
+.box-note{font-size:.7rem;color:var(--muted);margin-top:.45rem}
+.name-row{display:flex;gap:.6rem;max-width:480px;margin:0 auto}
+.name-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.78rem .95rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.92rem;outline:none;transition:border-color .2s}
+.name-input:focus{border-color:var(--accent)}
+.name-input::placeholder{color:var(--muted)}
+
+/* TASK CARDS */
+.task-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:2rem 0}
+.task-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.6rem 1.4rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.task-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;transform:scaleX(0);transition:transform .3s}
+.task-card.writing::after{background:var(--accent)}.task-card.speaking::after{background:var(--speaking)}
+.task-card:hover{border-color:#444;transform:translateY(-2px)}.task-card:hover::after{transform:scaleX(1)}
+.task-icon{font-size:1.5rem;margin-bottom:.7rem}
+.task-card h3{font-size:1rem;font-weight:600;margin-bottom:.3rem}
+.task-card.writing h3{color:var(--accent)}.task-card.speaking h3{color:var(--speaking)}
+.task-card p{color:var(--muted);font-size:.8rem;line-height:1.6}
+
+/* PROMPT LIST */
+.pick-header{margin-bottom:1.5rem}
+.pick-header h2{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:.3rem}
+.pick-header p{color:var(--muted);font-size:.84rem}
+.prompt-list{display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.5rem}
+.prompt-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.3rem;cursor:pointer;transition:all .2s}
+.prompt-item:hover{border-color:#555;transform:translateX(3px)}
+.prompt-item.selected{border-color:var(--accent);background:rgba(200,240,90,.05)}
+.prompt-item.selected.s{border-color:var(--speaking);background:rgba(90,240,200,.05)}
+.prompt-num{font-family:'DM Mono',monospace;font-size:.68rem;color:var(--muted);margin-bottom:.35rem}
+.prompt-title{font-size:.9rem;font-weight:500;margin-bottom:.25rem}
+.prompt-preview{font-size:.8rem;color:var(--muted);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+
+/* SECTION HEADER */
+.sec-header{display:flex;align-items:center;gap:.85rem;margin-bottom:1.5rem;padding-bottom:1.1rem;border-bottom:1px solid var(--border)}
+.tag{font-family:'DM Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.12em;padding:.28rem .7rem;border-radius:2rem}
+.tag-w{background:rgba(200,240,90,.12);color:var(--accent)}.tag-s{background:rgba(90,240,200,.12);color:var(--speaking)}
+.sec-header h2{font-family:'Playfair Display',serif;font-size:1.35rem}
+.student-chip{margin-left:auto;font-size:.78rem;color:var(--muted)}.student-chip strong{color:var(--text)}
+
+/* PROMPT BOX */
+.prompt-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.2rem 1.4rem;margin-bottom:1.3rem}
+.prompt-box.w{border-left:3px solid var(--accent)}.prompt-box.s{border-left:3px solid var(--speaking)}
+.plabel{font-family:'DM Mono',monospace;font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.55rem}
+.ptext{font-size:.91rem;line-height:1.75}
+.pnote{margin-top:.6rem;font-size:.76rem;color:var(--muted);font-style:italic}
+
+/* WRITING */
+textarea{width:100%;min-height:280px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.1rem 1.25rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.91rem;line-height:1.8;resize:vertical;outline:none;transition:border-color .2s}
+textarea:focus{border-color:var(--accent)}
+.wc{text-align:right;font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);margin-top:.35rem}
+.wc.ok{color:var(--accent)}.wc.warn{color:#f0b45a}
+
+/* RECORDER */
+.recorder{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:2rem;text-align:center}
+.rec-timer{font-family:'DM Mono',monospace;font-size:1.7rem;margin-bottom:1.2rem}
+.rec-timer.live{color:var(--danger)}
+.rec-btn{width:80px;height:80px;border-radius:50%;border:2px solid var(--speaking);background:rgba(90,240,200,.08);cursor:pointer;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;transition:all .2s}
+.rec-btn:hover{background:rgba(90,240,200,.16);transform:scale(1.05)}
+.rec-btn.live{border-color:var(--danger);background:rgba(240,90,90,.1);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(240,90,90,.35)}50%{box-shadow:0 0 0 14px rgba(240,90,90,0)}}
+.rec-status{font-size:.84rem;color:var(--muted)}
+.audio-wrap{margin-top:1.3rem;display:none}.audio-wrap audio{width:100%;border-radius:8px}
+.tx-box{margin-top:1rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.9rem 1.1rem;text-align:left;display:none}
+.tx-box p{font-size:.84rem;line-height:1.7}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.75rem 1.4rem;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;transition:all .2s}
+.btn-p{background:var(--accent);color:#0f0f0f}.btn-p:hover{background:#d4f570;transform:translateY(-1px)}.btn-p:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-s{background:var(--speaking);color:#0f0f0f}.btn-s:hover{background:#70f5d4}.btn-s:disabled{opacity:.4;cursor:not-allowed}
+.btn-g{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-g:hover{border-color:#555;color:var(--text)}
+.btn-row{display:flex;gap:.6rem;margin-top:1.3rem;flex-wrap:wrap}
+.err{background:rgba(240,90,90,.1);border:1px solid rgba(240,90,90,.3);color:#f09090;border-radius:8px;padding:.8rem 1rem;font-size:.8rem;margin-top:.8rem;display:none}
+
+/* RESULTS */
+.band-hero{display:flex;align-items:center;gap:1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.6rem 2rem;margin-bottom:1.2rem}
+.band-num{font-family:'Playfair Display',serif;font-size:4rem;line-height:1;min-width:90px}
+.band-num small{font-size:.85rem;color:var(--muted);font-family:'DM Mono',monospace;display:block;margin-top:.1rem}
+.band-info h3{font-size:.98rem;margin-bottom:.3rem}
+.band-info p{color:var(--muted);font-size:.83rem;line-height:1.6}
+.crit-grid{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1rem}
+.crit-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem}
+.crit-name{font-family:'DM Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.3rem}
+.crit-score{font-family:'Playfair Display',serif;font-size:1.6rem;margin-bottom:.28rem}
+.crit-fb{font-size:.77rem;color:var(--muted);line-height:1.5}
+.crit-next{margin-top:.4rem;font-size:.74rem;background:var(--surface2);border-radius:5px;padding:.4rem .55rem;color:var(--muted)}
+.detail-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-bottom:.9rem}
+.detail-box h4{font-size:.86rem;font-weight:600;margin-bottom:.65rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+.detail-box ul{padding-left:1rem}.detail-box li{font-size:.83rem;line-height:1.9;color:var(--text)}
+.gtable{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:.4rem}
+.gtable th{background:var(--surface2);padding:.5rem .65rem;text-align:left;color:var(--muted);border:1px solid var(--border);font-size:.7rem}
+.gtable td{padding:.5rem .65rem;border:1px solid var(--border);line-height:1.5;vertical-align:top}
+.gtable tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+.err-c{background:rgba(240,90,90,.15);color:#f09090;padding:.1rem .35rem;border-radius:.2rem;font-family:'DM Mono',monospace;font-size:.76rem}
+.ok-c{background:rgba(200,240,90,.12);color:var(--accent);padding:.1rem .35rem;border-radius:.2rem;font-family:'DM Mono',monospace;font-size:.76rem}
+.vtable{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:.4rem}
+.vtable th{background:var(--surface2);padding:.5rem .65rem;text-align:left;color:var(--muted);border:1px solid var(--border);font-size:.7rem}
+.vtable td{padding:.5rem .65rem;border:1px solid var(--border);line-height:1.5;vertical-align:top}
+.vtable tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+.save-row{display:flex;align-items:center;gap:.5rem;font-size:.76rem;color:var(--muted);margin-bottom:1.2rem}
+.save-dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+
+/* TIMER */
+.timer-bar{display:flex;align-items:center;gap:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.85rem 1.2rem;margin-bottom:1.2rem}
+.timer-display{font-family:'DM Mono',monospace;font-size:1.6rem;font-weight:500;min-width:80px}
+.timer-display.warn{color:#f0b45a}
+.timer-display.danger{color:var(--danger);animation:blink .8s infinite}
+.timer-label{font-size:.8rem;color:var(--muted);flex:1}
+.timer-btns{display:flex;gap:.5rem}
+.tbtn{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:.35rem .75rem;font-size:.75rem;cursor:pointer;color:var(--text);transition:all .2s}
+.tbtn:hover{border-color:#555}
+.tbtn.running{border-color:var(--danger);color:var(--danger)}
+.timer-progress{height:3px;background:var(--border);border-radius:0 0 8px 8px;margin-top:.6rem;overflow:hidden;margin:-0.85rem -1.2rem -0.85rem;margin-top:.85rem}
+.timer-progress-bar{height:100%;background:var(--accent);transition:width 1s linear;border-radius:0 0 8px 8px}
+
+/* CHART IMAGE */
+.chart-img{width:100%;border-radius:8px;margin-top:.85rem;border:1px solid var(--border);display:block}
+.chart-img-wrap{margin-top:.85rem}
+.chart-img-wrap .plabel{margin-bottom:.45rem}
+
+/* OVERLAY */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center}
+.overlay.show{display:flex}
+.ov-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;text-align:center;max-width:300px;width:90%}
+.spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .85s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ov-card h3{font-size:.95rem;margin-bottom:.3rem}
+.ov-card p{color:var(--muted);font-size:.78rem}
+
+@media(max-width:580px){
+  header{padding:1rem 1.1rem}main{padding:1.5rem 1rem 4rem}
+  .task-grid{grid-template-columns:1fr}.crit-grid{grid-template-columns:1fr}
+  .band-hero{flex-direction:column;text-align:center}.name-row{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">IELTS <span>Homework</span></div>
+</header>
+
+<main>
+
+<!-- STEP 0: WELCOME -->
+<div class="step active" id="step-welcome">
+  <div class="hero">
+    <h1>Nộp bài<br><em>thông minh hơn.</em></h1>
+    <p>Chọn đề, làm bài, nhận kết quả ngay theo chuẩn IELTS band descriptors.</p>
+  </div>
+  <div class="box">
+    <label>Gemini API Key</label>
+    <input type="password" id="apiKey" placeholder="AIza..." />
+    <p class="box-note">Key chỉ dùng trong session này — không lưu lại.</p>
+  </div>
+  <div class="name-row">
+    <input type="text" class="name-input" id="studentName" placeholder="Họ và tên của bạn..." maxlength="60" />
+    <button class="btn btn-p" onclick="startApp()">Bắt đầu →</button>
+  </div>
+  <div class="err" id="startErr"></div>
+</div>
+
+<!-- STEP 1: CHOOSE TASK TYPE -->
+<div class="step" id="step-choose">
+  <div class="dots"><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  <div style="margin-bottom:1.5rem">
+    <div style="font-size:.8rem;color:var(--muted)">Xin chào, <strong style="color:var(--text)" id="greetName"></strong> 👋</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:1.55rem;margin-top:.35rem">Bạn muốn luyện gì hôm nay?</h2>
+  </div>
+  <div class="task-grid">
+    <div class="task-card writing" onclick="chooseType('writing')">
+      <div class="task-icon">✍️</div>
+      <h3>Writing</h3>
+      <p>Chọn đề essay từ danh sách. Viết trực tiếp và nhận phản hồi chi tiết.</p>
+    </div>
+    <div class="task-card speaking" onclick="chooseType('speaking')">
+      <div class="task-icon">🎙️</div>
+      <h3>Speaking</h3>
+      <p>Chọn cue card từ danh sách. Ghi âm và nhận chấm điểm tự động.</p>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2A: PICK WRITING PROMPT -->
+<div class="step" id="step-pick-writing">
+  <div class="dots"><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
+  <div class="pick-header">
+    <h2>Chọn đề Writing</h2>
+    <p>Chọn 1 đề bên dưới để bắt đầu làm bài</p>
+  </div>
+  <div class="prompt-list" id="writingList"></div>
+  <div class="btn-row">
+    <button class="btn btn-p" id="startWritingBtn" onclick="startWriting()" disabled>Làm bài này →</button>
+    <button class="btn btn-g" onclick="showStep('choose')">← Quay lại</button>
+  </div>
+</div>
+
+<!-- STEP 2B: PICK SPEAKING PROMPT -->
+<div class="step" id="step-pick-speaking">
+  <div class="dots"><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
+  <div class="pick-header">
+    <h2>Chọn đề Speaking</h2>
+    <p>Chọn 1 cue card bên dưới để bắt đầu ghi âm</p>
+  </div>
+  <div class="prompt-list" id="speakingList"></div>
+  <div class="btn-row">
+    <button class="btn btn-s" id="startSpeakingBtn" onclick="startSpeaking()" disabled>Làm bài này →</button>
+    <button class="btn btn-g" onclick="showStep('choose')">← Quay lại</button>
+  </div>
+</div>
+
+<!-- STEP 3A: WRITING -->
+<div class="step" id="step-writing">
+  <div class="dots"><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div><div class="dot"></div></div>
+  <div class="sec-header">
+    <span class="tag tag-w" id="wTaskLabel">Writing Task 2</span>
+    <h2>Bài viết</h2>
+    <div class="student-chip">Học viên: <strong id="wName"></strong></div>
+  </div>
+
+  <!-- TIMER -->
+  <div class="timer-bar">
+    <div>
+      <div class="timer-display" id="timerDisplay">40:00</div>
+      <div class="timer-progress"><div class="timer-progress-bar" id="timerBar" style="width:100%"></div></div>
+    </div>
+    <div class="timer-label" id="timerLabel">Đang chuẩn bị...</div>
+  </div>
+
+  <div class="prompt-box w">
+    <div class="plabel">Đề bài</div>
+    <p class="ptext" id="wPrompt"></p>
+    <!-- Chart image (Task 1 only) -->
+    <div class="chart-img-wrap" id="chartWrap" style="display:none">
+      <div class="plabel">Biểu đồ / Hình ảnh đề bài</div>
+      <img id="chartImg" class="chart-img" alt="Chart" />
+    </div>
+    <p class="pnote" id="wNote">⏱ Thời gian: 40 phút &nbsp;|&nbsp; Tối thiểu: 250 từ</p>
+  </div>
+  <textarea id="wAnswer" placeholder="Bắt đầu viết bài tại đây..." oninput="countWords()"></textarea>
+  <div class="wc" id="wc">0 từ</div>
+  <div class="btn-row">
+    <button class="btn btn-p" onclick="submitWriting()">Nộp &amp; Chấm bài →</button>
+    <button class="btn btn-g" onclick="showStep('step-pick-writing')">← Đổi đề</button>
+  </div>
+  <div class="err" id="wErr"></div>
+</div>
+
+<!-- STEP 3B: SPEAKING -->
+<div class="step" id="step-speaking">
+  <div class="dots"><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div><div class="dot"></div></div>
+  <div class="sec-header">
+    <span class="tag tag-s" id="sPartLabel">Speaking Part 2</span>
+    <h2>Bài nói</h2>
+    <div class="student-chip">Học viên: <strong id="sName"></strong></div>
+  </div>
+  <div class="prompt-box s">
+    <div class="plabel">Đề bài (Cue Card)</div>
+    <p class="ptext" id="sPrompt"></p>
+    <p class="pnote">⏱ Chuẩn bị 1 phút &nbsp;|&nbsp; Nói 1–2 phút</p>
+  </div>
+  <div class="recorder">
+    <div class="rec-timer" id="recTimer">00:00</div>
+    <button class="rec-btn" id="recBtn" onclick="toggleRec()">
+      <svg id="icMic" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#5af0c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="2" width="6" height="11" rx="3"/>
+        <path d="M5 10a7 7 0 0 0 14 0"/>
+        <line x1="12" y1="19" x2="12" y2="22"/>
+        <line x1="8" y1="22" x2="16" y2="22"/>
+      </svg>
+      <svg id="icStop" width="24" height="24" viewBox="0 0 24 24" fill="#f05a5a" style="display:none">
+        <rect x="4" y="4" width="16" height="16" rx="2"/>
+      </svg>
+    </button>
+    <div class="rec-status" id="recStatus">Nhấn để bắt đầu ghi âm</div>
+    <div class="audio-wrap" id="audioWrap"><audio controls id="audioEl"></audio></div>
+    <div class="tx-box" id="txBox">
+      <div class="plabel" style="margin-bottom:.35rem">Transcript</div>
+      <p id="txText"></p>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-s" id="submitSpBtn" onclick="submitSpeaking()" disabled>Nộp &amp; Chấm bài →</button>
+    <button class="btn btn-g" onclick="showStep('step-pick-speaking')">← Đổi đề</button>
+  </div>
+  <div class="err" id="sErr"></div>
+</div>
+
+<!-- STEP 4: RESULTS -->
+<div class="step" id="step-results">
+  <div class="dots"><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div></div>
+  <div id="resultsPanel"></div>
+  <div class="btn-row">
+    <button class="btn btn-p" onclick="showStep('choose')">Làm bài khác</button>
+    <button class="btn btn-g" onclick="window.print()">🖨 In kết quả</button>
+  </div>
+</div>
+
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="ov-card">
+    <div class="spinner"></div>
+    <h3>Đang chấm bài...</h3>
+    <p id="ovMsg">Claude đang phân tích theo IELTS band descriptors</p>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// DANH SÁCH ĐỀ — Thêm/sửa đề tại đây
+// ══════════════════════════════════════════════════════
+const WRITING_PROMPTS = [
+  // ── TASK 1 ──
+  {
+    id: 'w1', task: 'Task 1',
+    title: 'Workers migrating to Australia (Dynamic)',
+    image_url: 'task 1_dynamic.png',
+    prompt: 'The chart below gives information on the numbers of workers in different occupations who migrated to Australia between 2009 and 2012.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'
+  },
+  {
+    id: 'w2', task: 'Task 1',
+    title: 'Automobile survey in Europe (Static)',
+    image_url: 'task 1_static.jpg',
+    prompt: 'The bar charts display the results from a 2009 survey regarding people\'s automobile in a European country.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'
+  },
+  {
+    id: 'w3', task: 'Task 1',
+    title: 'Recycling aluminium cans (Process)',
+    image_url: 'task 1_process.jpg',
+    prompt: 'The diagram below shows the stages in the recycling of aluminum drinks can.\n\nSummarize the information by selecting and reporting the main features, and make comparisons where relevant.'
+  },
+  {
+    id: 'w4', task: 'Task 1',
+    title: 'Beachfront area in Australia (Map)',
+    image_url: 'task 1_map.jpg',
+    prompt: 'The maps below show a beachfront area in Australia in 1950 and the same area today.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'
+  },
+  {
+    id: 'w5', task: 'Task 1',
+    title: 'Aid to developing countries (Dynamic)',
+    image_url: 'task 1_dynamic 02.png',
+    prompt: 'The table shows the amount of money given to developing countries by the USA, EU countries and other countries from 2006 to 2010 (Figures are in millions of dollars).\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'
+  },
+  {
+    id: 'w6', task: 'Task 1',
+    title: 'World\'s water distribution (Static)',
+    image_url: 'task 1_static 02.jpg',
+    prompt: 'The charts below show the distribution of the world\'s water and the use of water in three countries.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'
+  },
+  {
+    id: 'w7', task: 'Task 1',
+    title: 'Growing and preparing pineapples (Process)',
+    image_url: 'task 1_process 02.jpg',
+    prompt: 'The diagram below shows the process of growing and preparing pineapples and pineapple products.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'
+  },
+  {
+    id: 'w8', task: 'Task 1',
+    title: 'Student common room (Map)',
+    image_url: 'task 1_map 02.png',
+    prompt: 'The plans show a student common room from five years ago and now.\n\nSummarize the information by selecting and reporting the main features and make comparisons where relevant.'
+  },
+  {
+    id: 'w9', task: 'Task 1',
+    title: 'Village in 1910 and 2010 (Map)',
+    image_url: 'task 1_map 03.jpg',
+    prompt: 'The maps below show a part of a village in 1910 and the same part of the village in 2010.\n\nSummarize the information by selecting and reporting the main features and make comparisons where relevant.'
+  },
+  // ── TASK 2 ──
+  {
+    id: 'w10', task: 'Task 2',
+    title: 'Working hard — reasons and effects',
+    image_url: '',
+    prompt: 'In education and employment, some people work harder than others.\n\nWhy do some people work harder? Is it always a good thing to work hard?'
+  },
+  {
+    id: 'w11', task: 'Task 2',
+    title: 'Advertising and unnecessary products',
+    image_url: '',
+    prompt: 'The main purpose of advertising is to increase the sales of products that people don\'t really need.\n\nTo what extent do you agree or disagree?'
+  },
+  {
+    id: 'w12', task: 'Task 2',
+    title: 'Young criminals and adult punishment',
+    image_url: '',
+    prompt: 'Some people believe that young people who commit serious crimes should be punished in the same way as adults.\n\nDo you agree or disagree?'
+  },
+  {
+    id: 'w13', task: 'Task 2',
+    title: 'Free libraries vs. internet access',
+    image_url: '',
+    prompt: 'Some people think the government should establish free libraries in each town. Others believe that it is a waste of money since people can access the Internet to obtain information.\n\nDiscuss both views and give your own opinion.'
+  },
+  {
+    id: 'w14', task: 'Task 2',
+    title: 'Cyclists and road safety test',
+    image_url: '',
+    prompt: 'Some experts say for road safety cyclists should pass a test before being allowed on public roads.\n\nTo what extent do you agree or disagree?'
+  },
+  {
+    id: 'w15', task: 'Task 2',
+    title: 'Minimum driving age and road safety',
+    image_url: '',
+    prompt: 'Some people think that the best way to improve road safety is to increase the minimum legal age for driving a car or motorbike.\n\nTo what extent do you agree or disagree?'
+  },
+  {
+    id: 'w16', task: 'Task 2',
+    title: 'International news as a school subject',
+    image_url: '',
+    prompt: 'Some believe secondary students should learn International news as a subject at school, while some think it\'s a waste of time.\n\nDiscuss both views and give your opinion.'
+  }
+];
+
+const SPEAKING_PROMPTS = [
+  // ── PART 1 ──
+  {
+    id: 's1', part: 'Part 1',
+    title: 'Buildings / Scenery / Shoes',
+    prompt: 'BUILDINGS\n• Do you want to live in a tall building?\n• Is there a building that you would like to visit?\n• Do you take photos of buildings?\n• Are there tall buildings near your home?\n\nSCENERY\n• Do you like to take scenery pictures?\n• Do you prefer the mountains or the sea?\n• What are the most beautiful sights you have seen while travelling?\n\nSHOES\n• Which do you prefer, fashionable shoes or comfortable shoes?\n• How much money do you usually spend on shoes?\n• Have you ever bought shoes online?'
+  },
+  {
+    id: 's2', part: 'Part 1',
+    title: 'Reading / Rain / Colors',
+    prompt: 'READING\n• Do you prefer scanning or detailed reading?\n• When do you need to read carefully, and when not?\n• Do you prefer to read on paper or on a screen?\n\nRAIN\n• Do you like rainy days? Why?\n• Does it rain much in your city?\n• Would you like to live in a dry or wet place?\n\nCOLORS\n• What is your favorite color?\n• Do you usually wear clothes in your favorite color?\n• Are there any colors that have a special meaning in your country?'
+  },
+  {
+    id: 's3', part: 'Part 1',
+    title: 'Typing / Public places / Chocolate',
+    prompt: 'TYPING\n• Do you prefer typing or handwriting?\n• When did you learn how to type on a keyboard?\n• How do you improve your typing?\n\nPUBLIC PLACES\n• Do you usually go to public places with your friends?\n• Do you wear headphones when you are in public places?\n• Have you ever talked with someone you don\'t know in public places?\n\nCHOCOLATE\n• Do you like eating chocolate? Why or why not?\n• How often do you eat chocolate?\n• Why do you think chocolate is popular around the world?'
+  },
+  {
+    id: 's4', part: 'Part 1',
+    title: 'Flowers / Advertisement',
+    prompt: 'FLOWERS\n• Do you love flowers?\n• Are there a lot of flowers where you live?\n• Do people in your country often send flowers to others?\n• Are there any flowers that have special meanings in Vietnam?\n\nADVERTISEMENT\n• Do you like advertisements?\n• What kind of advertising do you like?\n• Do you often see advertisements when you are on your phone or computer?\n• Is there an advertisement that made an impression on you when you were a child?'
+  },
+  {
+    id: 's5', part: 'Part 1',
+    title: 'Taking photos / Bags',
+    prompt: 'TAKING PHOTOS\n• Do you like taking photos?\n• Do you like taking selfies?\n• What is your favorite family photo?\n• Do you want to improve your photography skills?\n\nBAGS\n• Do you usually carry a bag?\n• Do you change your bags often?\n• What kind of bags would you use when traveling?\n• Is a bag an ideal gift?'
+  },
+  // ── PART 2 ──
+  {
+    id: 's6', part: 'Part 2',
+    title: 'An unusual meal',
+    prompt: 'Describe an unusual meal you had.\n\nYou should say:\n• Who you were with\n• Where you went\n• When it happened\n\nAnd explain why it was unusual.'
+  },
+  {
+    id: 's7', part: 'Part 2',
+    title: 'A natural talent you want to improve',
+    prompt: 'Describe a natural talent you want to improve like sport, music, etc.\n\nYou should say:\n• What it is\n• When you discovered it\n• How you want to improve it\n\nAnd explain how you feel about it.'
+  },
+  {
+    id: 's8', part: 'Part 2',
+    title: 'Preparing for a happy event',
+    prompt: 'Describe a time when you prepared for a happy event successfully.\n\nYou should say:\n• What the event was\n• How you prepared for it\n• Who helped you organize it\n\nAnd explain why you think it was a successful event.'
+  },
+  {
+    id: 's9', part: 'Part 2',
+    title: 'An interesting traditional story',
+    prompt: 'Describe an interesting traditional story.\n\nYou should say:\n• What the story is about\n• When/how you knew it\n• Who told you the story\n\nAnd explain how you felt when you first heard it.'
+  },
+  {
+    id: 's10', part: 'Part 2',
+    title: 'A time when someone apologized to you',
+    prompt: 'Describe a time when someone apologized to you.\n\nYou should say:\n• When it happened\n• Who this person is\n• Why he/she apologized to you\n\nAnd explain how you felt about it.'
+  },
+  {
+    id: 's11', part: 'Part 2',
+    title: 'A piece of technology difficult to use',
+    prompt: 'Describe a piece of technology that you feel difficult to use.\n\nYou should say:\n• When did you get it?\n• What did you get it for?\n• How often do you use it?\n\nAnd explain how you feel about it.'
+  },
+  {
+    id: 's12', part: 'Part 2',
+    title: 'A famous person you would like to meet',
+    prompt: 'Describe a famous person you would like to meet.\n\nYou should say:\n• Who he/she is\n• What he/she is famous for\n• What you would do if you met him/her\n\nAnd explain why you would like to meet him/her.'
+  },
+  // ── PART 3 ──
+  {
+    id: 's13', part: 'Part 3',
+    title: 'Libraries and reading',
+    prompt: 'LIBRARIES & READING\n• What should we do to prevent modern libraries from closing down?\n• Have libraries changed a lot with the development of the internet?\n• Which one is better, paper books or e-books?\n• Do you think old people spend more time reading than young people?\n• What should the government do to make libraries better?\n• What are the types of books that young people like to read?'
+  },
+  {
+    id: 's14', part: 'Part 3',
+    title: 'Fame and famous people',
+    prompt: 'FAME & FAMOUS PEOPLE\n• Do you think that famous people are generally happier than ordinary people?\n• What qualities does a person need to have in order to be famous?\n• Is it easier or more difficult to achieve fame today than in your grandparents\' time?\n• Do you think more is expected from famous people than ordinary citizens?'
+  },
+  {
+    id: 's15', part: 'Part 3',
+    title: 'Technology and older people',
+    prompt: 'TECHNOLOGY\n• Do you find it difficult to use the latest technology?\n• How will older people use technology?'
+  },
+  {
+    id: 's16', part: 'Part 3',
+    title: 'Restaurants and unusual food',
+    prompt: 'RESTAURANTS & FOOD\n• What are the advantages and disadvantages of eating in restaurants?\n• What fast food is there in your country?\n• Why do some people choose to eat out instead of ordering takeout?\n• Do people in your country value food culture?\n• What are some reasons why people might choose to eat unusual or exotic foods?\n• What are some challenges that restaurants might face when serving unusual foods?'
+  }
+];
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+const S = {
+  name: '', apiKey: '', type: '',
+  selectedWriting: null, selectedSpeaking: null,
+  mediaRecorder: null, audioChunks: [], audioBlob: null,
+  recInterval: null, recSeconds: 0, isRecording: false,
+  transcript: '', recognition: null,
+  timerInterval: null, timerSeconds: 0, timerTotal: 0, timerRunning: false,
+};
+
+// ══════════════════════════════════════════════════════
+// INIT — Build prompt lists on load
+// ══════════════════════════════════════════════════════
+(function init() {
+  // Build writing list
+  const wList = document.getElementById('writingList');
+  WRITING_PROMPTS.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'prompt-item';
+    div.id = 'wi-' + p.id;
+    div.onclick = () => selectWriting(p.id);
+    div.innerHTML = `
+      <div class="prompt-num">${p.task} &nbsp;·&nbsp; #${i+1}</div>
+      <div class="prompt-title">${p.title}</div>
+      <div class="prompt-preview">${p.prompt.replace(/\n/g,' ')}</div>`;
+    wList.appendChild(div);
+  });
+
+  // Build speaking list
+  const sList = document.getElementById('speakingList');
+  SPEAKING_PROMPTS.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'prompt-item';
+    div.id = 'si-' + p.id;
+    div.onclick = () => selectSpeaking(p.id);
+    div.innerHTML = `
+      <div class="prompt-num">${p.part} &nbsp;·&nbsp; #${i+1}</div>
+      <div class="prompt-title">${p.title}</div>
+      <div class="prompt-preview">${p.prompt.replace(/\n/g,' ')}</div>`;
+    sList.appendChild(div);
+  });
+})();
+
+// ══════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════
+function showStep(id) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('step-' + id) || document.getElementById(id);
+  if (el) el.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startApp() {
+  const name = document.getElementById('studentName').value.trim();
+  const key  = document.getElementById('apiKey').value.trim();
+  const err  = document.getElementById('startErr');
+  if (!name) { err.style.display='block'; err.textContent='Vui lòng nhập họ tên.'; return; }
+  if (!key)  { err.style.display='block'; err.textContent='Vui lòng nhập API key.'; return; }
+  err.style.display = 'none';
+  S.name = name; S.apiKey = key;
+  document.getElementById('greetName').textContent = name;
+  showStep('choose');
+}
+
+function chooseType(type) {
+  S.type = type;
+  if (type === 'writing') showStep('step-pick-writing');
+  else showStep('step-pick-speaking');
+}
+
+// ══════════════════════════════════════════════════════
+// PROMPT SELECTION
+// ══════════════════════════════════════════════════════
+function selectWriting(id) {
+  document.querySelectorAll('#writingList .prompt-item').forEach(el => el.classList.remove('selected'));
+  document.getElementById('wi-' + id).classList.add('selected');
+  S.selectedWriting = WRITING_PROMPTS.find(p => p.id === id);
+  document.getElementById('startWritingBtn').disabled = false;
+}
+
+function selectSpeaking(id) {
+  document.querySelectorAll('#speakingList .prompt-item').forEach(el => el.classList.remove('selected'));
+  const el = document.getElementById('si-' + id);
+  el.classList.add('selected');
+  el.classList.add('s');
+  S.selectedSpeaking = SPEAKING_PROMPTS.find(p => p.id === id);
+  document.getElementById('startSpeakingBtn').disabled = false;
+}
+
+function startWriting() {
+  const p = S.selectedWriting;
+  document.getElementById('wName').textContent = S.name;
+  document.getElementById('wTaskLabel').textContent = `Writing ${p.task}`;
+  document.getElementById('wPrompt').innerHTML = p.prompt.replace(/\n/g, '<br>');
+
+  // Show image if Task 1 and has image_url
+  const chartWrap = document.getElementById('chartWrap');
+  const chartImg  = document.getElementById('chartImg');
+  if (p.task === 'Task 1' && p.image_url) {
+    chartImg.src = p.image_url;
+    chartWrap.style.display = 'block';
+  } else {
+    chartWrap.style.display = 'none';
+  }
+
+  // Setup timer
+  const isT1 = p.task === 'Task 1';
+  const mins  = isT1 ? 20 : 40;
+  document.getElementById('wNote').textContent = `⏱ Thời gian: ${mins} phút | Tối thiểu: ${isT1?150:250} từ`;
+  timerSetup(mins);
+
+  document.getElementById('wAnswer').value = '';
+  document.getElementById('wc').textContent = '0 từ';
+  document.getElementById('wErr').style.display = 'none';
+  showStep('writing');
+}
+
+function startSpeaking() {
+  const p = S.selectedSpeaking;
+  document.getElementById('sName').textContent = S.name;
+  document.getElementById('sPartLabel').textContent = `Speaking ${p.part}`;
+  document.getElementById('sPrompt').innerHTML = p.prompt.replace(/\n/g, '<br>');
+  resetRecorder();
+  showStep('speaking');
+}
+
+// ══════════════════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════════════════
+function timerSetup(mins) {
+  clearInterval(S.timerInterval);
+  S.timerSeconds = mins * 60;
+  S.timerTotal   = mins * 60;
+  S.timerRunning = false;
+  document.getElementById('timerBar').style.width      = '100%';
+  document.getElementById('timerBar').style.background = 'var(--accent)';
+  renderTimer();
+  setTimeout(() => timerStart(), 1000);
+}
+
+function timerStart() {
+  if (S.timerRunning) return;
+  S.timerRunning = true;
+  S.timerInterval = setInterval(() => {
+    S.timerSeconds--;
+    renderTimer();
+    if (S.timerSeconds <= 0) {
+      clearInterval(S.timerInterval);
+      S.timerRunning = false;
+      document.getElementById('timerLabel').textContent     = '⏰ Hết giờ! Đang tự động nộp bài...';
+      document.getElementById('timerDisplay').className     = 'timer-display danger';
+      setTimeout(() => submitWriting(), 2000);
+    }
+  }, 1000);
+}
+
+function timerReset() {
+  const p = S.selectedWriting;
+  if (p) timerSetup(p.task === 'Task 1' ? 20 : 40);
+}
+
+function renderTimer() {
+  const m   = String(Math.floor(S.timerSeconds / 60)).padStart(2, '0');
+  const s   = String(S.timerSeconds % 60).padStart(2, '0');
+  const pct = (S.timerSeconds / S.timerTotal) * 100;
+  const el  = document.getElementById('timerDisplay');
+  const bar = document.getElementById('timerBar');
+  const lbl = document.getElementById('timerLabel');
+
+  el.textContent = `${m}:${s}`;
+  bar.style.width = pct + '%';
+
+  if (S.timerSeconds <= 60) {
+    el.className = 'timer-display danger';
+    bar.style.background = 'var(--danger)';
+    lbl.textContent = '⚠️ Còn dưới 1 phút!';
+  } else if (S.timerSeconds <= S.timerTotal * 0.25) {
+    el.className = 'timer-display warn';
+    bar.style.background = '#f0b45a';
+    lbl.textContent = `⚡ Còn ${m}:${s} — nhanh lên!`;
+  } else {
+    el.className = 'timer-display';
+    lbl.textContent = `Còn ${m}:${s}`;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// WORD COUNT
+// ══════════════════════════════════════════════════════
+function countWords() {
+  const t = document.getElementById('wAnswer').value.trim();
+  const n = t ? t.split(/\s+/).length : 0;
+  const isT1 = S.selectedWriting && S.selectedWriting.task === 'Task 1';
+  const min = isT1 ? 150 : 250;
+  const el = document.getElementById('wc');
+  el.textContent = `${n} từ${n >= min ? ' ✓' : ` (cần thêm ${min - n})`}`;
+  el.className = 'wc ' + (n >= min ? 'ok' : n >= min * 0.8 ? 'warn' : '');
+}
+
+// ══════════════════════════════════════════════════════
+// RECORDER
+// ══════════════════════════════════════════════════════
+function resetRecorder() {
+  S.audioBlob = null; S.transcript = ''; S.audioChunks = [];
+  S.recSeconds = 0; S.isRecording = false;
+  document.getElementById('recTimer').textContent = '00:00';
+  document.getElementById('recTimer').classList.remove('live');
+  document.getElementById('recBtn').classList.remove('live');
+  document.getElementById('icMic').style.display = 'block';
+  document.getElementById('icStop').style.display = 'none';
+  document.getElementById('recStatus').textContent = 'Nhấn để bắt đầu ghi âm';
+  document.getElementById('audioWrap').style.display = 'none';
+  document.getElementById('txBox').style.display = 'none';
+  document.getElementById('txText').textContent = '';
+  document.getElementById('submitSpBtn').disabled = true;
+  document.getElementById('sErr').style.display = 'none';
+}
+
+async function toggleRec() { S.isRecording ? stopRec() : await startRec(); }
+
+async function startRec() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    S.audioChunks = []; S.recSeconds = 0;
+    S.mediaRecorder = new MediaRecorder(stream);
+    S.mediaRecorder.ondataavailable = e => { if (e.data.size > 0) S.audioChunks.push(e.data); };
+    S.mediaRecorder.onstop = () => {
+      S.audioBlob = new Blob(S.audioChunks, { type: 'audio/webm' });
+      document.getElementById('audioEl').src = URL.createObjectURL(S.audioBlob);
+      document.getElementById('audioWrap').style.display = 'block';
+      document.getElementById('submitSpBtn').disabled = false;
+      if (!S.transcript) {
+        document.getElementById('txBox').style.display = 'block';
+        document.getElementById('txText').textContent = '(Không nhận dạng được — Claude sẽ chấm theo nội dung ghi âm)';
+      }
+    };
+    S.mediaRecorder.start(100);
+    S.isRecording = true;
+    document.getElementById('recBtn').classList.add('live');
+    document.getElementById('icMic').style.display = 'none';
+    document.getElementById('icStop').style.display = 'block';
+    document.getElementById('recTimer').classList.add('live');
+    document.getElementById('recStatus').textContent = 'Đang ghi âm... Nhấn để dừng';
+    S.recInterval = setInterval(() => {
+      S.recSeconds++;
+      const m = String(Math.floor(S.recSeconds / 60)).padStart(2, '0');
+      const s = String(S.recSeconds % 60).padStart(2, '0');
+      document.getElementById('recTimer').textContent = `${m}:${s}`;
+    }, 1000);
+    startLiveTx();
+  } catch(e) {
+    const el = document.getElementById('sErr');
+    el.style.display = 'block';
+    el.textContent = e.name === 'NotAllowedError'
+      ? 'Trình duyệt chưa cấp quyền microphone. Hãy cho phép và thử lại.'
+      : 'Lỗi microphone: ' + e.message;
+  }
+}
+
+function stopRec() {
+  if (!S.mediaRecorder || !S.isRecording) return;
+  S.mediaRecorder.stop();
+  S.mediaRecorder.stream.getTracks().forEach(t => t.stop());
+  S.isRecording = false;
+  clearInterval(S.recInterval);
+  document.getElementById('recBtn').classList.remove('live');
+  document.getElementById('icMic').style.display = 'block';
+  document.getElementById('icStop').style.display = 'none';
+  document.getElementById('recTimer').classList.remove('live');
+  document.getElementById('recStatus').textContent = '✅ Ghi âm xong. Nhấn "Nộp & Chấm bài" để tiếp tục.';
+  stopLiveTx();
+}
+
+function startLiveTx() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  let final = '';
+  S.recognition = new SR();
+  S.recognition.continuous = true;
+  S.recognition.interimResults = true;
+  S.recognition.lang = 'en-US';
+  S.recognition.onresult = ev => {
+    let interim = '';
+    for (let i = ev.resultIndex; i < ev.results.length; i++) {
+      ev.results[i].isFinal ? (final += ev.results[i][0].transcript + ' ') : (interim += ev.results[i][0].transcript);
+    }
+    S.transcript = final.trim();
+    const full = (final + interim).trim();
+    if (full) {
+      document.getElementById('txBox').style.display = 'block';
+      document.getElementById('txText').textContent = full;
+    }
+  };
+  S.recognition.onerror = () => {};
+  try { S.recognition.start(); } catch(e) {}
+}
+
+function stopLiveTx() {
+  if (S.recognition) { try { S.recognition.stop(); } catch(e) {} S.recognition = null; }
+}
+
+// ══════════════════════════════════════════════════════
+// SUBMIT
+// ══════════════════════════════════════════════════════
+async function submitWriting() {
+  const answer = document.getElementById('wAnswer').value.trim();
+  const words = answer ? answer.split(/\s+/).length : 0;
+  const errEl = document.getElementById('wErr');
+  if (words < 30) { errEl.style.display='block'; errEl.textContent='Vui lòng viết ít nhất 30 từ.'; return; }
+  errEl.style.display = 'none';
+  showOverlay('Đang phân tích bài viết...');
+  try {
+    const result = await gradeWriting(S.selectedWriting.prompt, answer, S.selectedWriting.task);
+    hideOverlay();
+    renderResults(result, 'writing');
+  } catch(e) {
+    hideOverlay();
+    errEl.style.display = 'block';
+    errEl.textContent = 'Lỗi: ' + e.message;
+  }
+}
+
+async function submitSpeaking() {
+  if (!S.audioBlob) return;
+  const errEl = document.getElementById('sErr');
+  errEl.style.display = 'none';
+  const tx = S.transcript || 'No transcript available. Please evaluate based on typical patterns.';
+  showOverlay('Đang chấm bài nói...');
+  try {
+    const result = await gradeSpeaking(S.selectedSpeaking.prompt, tx, S.selectedSpeaking.part);
+    hideOverlay();
+    renderResults(result, 'speaking');
+  } catch(e) {
+    hideOverlay();
+    errEl.style.display = 'block';
+    errEl.textContent = 'Lỗi: ' + e.message;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// CLAUDE API
+// ══════════════════════════════════════════════════════
+async function callClaude(system, user, maxTokens = 2500) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${S.apiKey}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      system_instruction: { parts: [{ text: system }] },
+      contents: [{ role: 'user', parts: [{ text: user }] }],
+      generationConfig: { maxOutputTokens: 8192, temperature: 0.3 },
+    }),
+  });
+  if (!res.ok) {
+    let msg = `HTTP ${res.status}`;
+    try { const j = await res.json(); msg = j.error?.message || msg; } catch(_) {}
+    throw new Error(msg);
+  }
+  const data = await res.json();
+  const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  return raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/,'').trim();
+}
+
+async function gradeWriting(prompt, essay, taskType) {
+  const isT1 = taskType && taskType.includes('1');
+  const c1 = isT1 ? 'task_achievement' : 'task_response';
+  const c1L = isT1 ? 'Task Achievement' : 'Task Response';
+  const system = `You are an expert IELTS Writing examiner. Grade strictly according to official IELTS Writing Band Descriptors (0-9, half-bands allowed).
+
+Key rules:
+- A script must FULLY FIT positive features at that band
+- Negative/bolded features LIMIT the score
+- When uncertain between two bands, choose the LOWER one
+- Minimum words: Task 1 = 150, Task 2 = 250. Penalize if underlength.
+- All feedback text must be in Vietnamese (except quoted examples from the essay)
+
+Respond ONLY with raw JSON, no markdown:
+{"${c1}":{"score":6.5,"strengths":["specific point with quote"],"weaknesses":["specific point with fix"],"descriptor_reason":"why this score not higher — cite descriptor","to_next_band":"one specific action"},"coherence_cohesion":{"score":6.0,"strengths":[],"weaknesses":[],"descriptor_reason":"","to_next_band":""},"lexical_resource":{"score":6.5,"strengths":[],"weaknesses":[],"descriptor_reason":"","to_next_band":""},"grammatical_range":{"score":6.0,"strengths":[],"weaknesses":[],"descriptor_reason":"","to_next_band":""},"overall_band":6.5,"overall_feedback":"2-3 câu tiếng Việt tóm tắt chất lượng bài","word_count_note":"e.g. 267 từ — đạt yêu cầu","grammar_table":[{"structure":"tên cấu trúc","formula":"S+V+O","error_example":"trích từ bài","correct_example":"câu đã sửa","note":"giải thích tiếng Việt"}],"vocabulary":[{"word":"từ/cụm từ","meaning":"nghĩa tiếng Việt","example":"câu ví dụ","note":"ghi chú sử dụng"}],"top_improvements":[{"title":"tên vấn đề","detail":"giải thích tiếng Việt","fix":"ví dụ câu sửa"}]}`;
+  const wc = essay.trim().split(/\s+/).length;
+  return JSON.parse(await callClaude(system, `IELTS Writing ${taskType} — Student: ${S.name} — Word count: ~${wc}\n\nPROMPT:\n${prompt}\n\nESSAY:\n${essay}`));
+}
+
+async function gradeSpeaking(prompt, transcript, part) {
+  const system = `You are an expert IELTS Speaking examiner. Grade according to official IELTS Speaking Band Descriptors (0-9, half-bands allowed).
+Note: Evaluating from transcript — fluency/pronunciation are approximate.
+All feedback in Vietnamese except quoted examples.
+
+Respond ONLY with raw JSON, no markdown:
+{"fluency_coherence":{"score":6.0,"strengths":[],"weaknesses":[],"descriptor_reason":"","to_next_band":""},"lexical_resource":{"score":6.5,"strengths":[],"weaknesses":[],"descriptor_reason":"","to_next_band":""},"grammatical_range":{"score":6.0,"strengths":[],"weaknesses":[],"descriptor_reason":"","to_next_band":""},"pronunciation":{"score":6.0,"strengths":[],"weaknesses":[],"descriptor_reason":"","to_next_band":""},"overall_band":6.0,"overall_feedback":"2-3 câu tiếng Việt","grammar_table":[{"structure":"","formula":"","error_example":"","correct_example":"","note":""}],"vocabulary":[{"word":"","meaning":"","example":"","note":""}],"top_improvements":[{"title":"","detail":"","fix":""}]}`;
+  return JSON.parse(await callClaude(system, `IELTS Speaking ${part} — Student: ${S.name}\n\nCUE CARD:\n${prompt}\n\nTRANSCRIPT:\n${transcript}`));
+}
+
+// ══════════════════════════════════════════════════════
+// RENDER RESULTS
+// ══════════════════════════════════════════════════════
+function renderResults(r, type) {
+  const isS = type === 'speaking';
+  const accent = isS ? 'var(--speaking)' : 'var(--accent)';
+  const criteria = isS
+    ? [{key:'fluency_coherence',label:'Fluency & Coherence'},{key:'lexical_resource',label:'Lexical Resource'},{key:'grammatical_range',label:'Grammatical Range & Accuracy'},{key:'pronunciation',label:'Pronunciation'}]
+    : [{key:(r.task_achievement!==undefined?'task_achievement':'task_response'),label:(r.task_achievement!==undefined?'Task Achievement':'Task Response')},{key:'coherence_cohesion',label:'Coherence & Cohesion'},{key:'lexical_resource',label:'Lexical Resource'},{key:'grammatical_range',label:'Grammatical Range & Accuracy'}];
+
+  const critCards = criteria.map(c => {
+    const d = r[c.key] || {};
+    const st = (d.strengths||[]).map(s=>`<li>✅ ${s}</li>`).join('');
+    const wk = (d.weaknesses||[]).map(w=>`<li>⚡ ${w}</li>`).join('');
+    return `<div class="crit-card">
+      <div class="crit-name">${c.label}</div>
+      <div class="crit-score" style="color:${accent}">${d.score??'—'}</div>
+      <div class="crit-fb">${d.descriptor_reason||''}</div>
+      ${st?`<ul style="padding-left:.9rem;font-size:.76rem;color:var(--muted);margin-top:.35rem">${st}</ul>`:''}
+      ${wk?`<ul style="padding-left:.9rem;font-size:.76rem;color:var(--muted);margin-top:.25rem">${wk}</ul>`:''}
+      ${d.to_next_band?`<div class="crit-next">🎯 ${d.to_next_band}</div>`:''}
+    </div>`;
+  }).join('');
+
+  const imps = (r.top_improvements||[]).map((imp,i)=>`
+    <div style="margin-bottom:.8rem;padding-bottom:.8rem;border-bottom:1px solid var(--border)">
+      <div style="font-weight:600;font-size:.82rem;margin-bottom:.25rem">${i+1}. ${imp.title}</div>
+      <div style="font-size:.79rem;color:var(--muted);margin-bottom:.25rem;line-height:1.6">${imp.detail}</div>
+      ${imp.fix?`<div style="font-size:.78rem;background:var(--surface2);border-radius:5px;padding:.4rem .6rem;font-family:'DM Mono',monospace;color:${accent}">${imp.fix}</div>`:''}
+    </div>`).join('');
+
+  const gramRows = (r.grammar_table||[]).filter(g=>g.structure).map(g=>`<tr>
+    <td><strong>${g.structure}</strong></td>
+    <td><code style="font-family:'DM Mono',monospace;font-size:.74rem">${g.formula||''}</code></td>
+    <td><span class="err-c">${g.error_example||''}</span></td>
+    <td><span class="ok-c">${g.correct_example||''}</span></td>
+    <td style="font-size:.76rem;color:var(--muted)">${g.note||''}</td>
+  </tr>`).join('');
+
+  const vocabRows = (r.vocabulary||[]).filter(v=>v.word).map(v=>`<tr>
+    <td><strong style="color:${accent}">${v.word}</strong></td>
+    <td style="color:var(--muted)">${v.meaning||''}</td>
+    <td style="font-style:italic">${v.example||''}</td>
+    <td style="font-size:.76rem;color:var(--muted)">${v.note||''}</td>
+  </tr>`).join('');
+
+  const promptTitle = isS ? S.selectedSpeaking?.title : S.selectedWriting?.title;
+
+  document.getElementById('resultsPanel').innerHTML = `
+    <div class="sec-header" style="margin-bottom:1.3rem">
+      <span class="tag ${isS?'tag-s':'tag-w'}">${isS?'Speaking':'Writing'}</span>
+      <h2>Kết quả chấm bài</h2>
+      <div class="student-chip"><strong>${S.name}</strong></div>
+    </div>
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">Đề: <em>${promptTitle||''}</em></div>
+
+    <div class="band-hero">
+      <div class="band-num" style="color:${accent}">${r.overall_band}<small>OVERALL</small></div>
+      <div class="band-info">
+        <h3>${bandLabel(r.overall_band)}</h3>
+        <p>${r.overall_feedback||''}</p>
+        ${r.word_count_note?`<p style="margin-top:.35rem;font-size:.76rem;color:var(--muted)">📝 ${r.word_count_note}</p>`:''}
+      </div>
+    </div>
+
+    <div class="crit-grid">${critCards}</div>
+
+    ${imps?`<div class="detail-box"><h4>🎯 Cần làm để lên band tiếp theo</h4>${imps}</div>`:''}
+
+    ${gramRows?`<div class="detail-box"><h4>📚 Ngữ pháp cần ôn (từ bài thực tế)</h4><div style="overflow-x:auto"><table class="gtable"><thead><tr><th>Cấu trúc</th><th>Công thức</th><th>Sai (từ bài)</th><th>Đúng</th><th>Lưu ý</th></tr></thead><tbody>${gramRows}</tbody></table></div></div>`:''}
+
+    ${vocabRows?`<div class="detail-box"><h4>💡 Từ vựng theo chủ đề</h4><div style="overflow-x:auto"><table class="vtable"><thead><tr><th>Từ / Cụm từ</th><th>Nghĩa</th><th>Ví dụ</th><th>Ghi chú</th></tr></thead><tbody>${vocabRows}</tbody></table></div></div>`:''}
+
+    <div class="save-row"><div class="save-dot" id="saveDot"></div><span id="saveStatus">Đang lưu lên Google Sheet...</span></div>`;
+
+  localStorage.setItem(`ielts_${S.name}_${type}_${Date.now()}`,
+    JSON.stringify({name:S.name,type,band:r.overall_band,prompt:promptTitle,ts:new Date().toISOString()}));
+
+  showStep('results');
+
+  // Lưu lên Google Sheet
+  saveToSheet(r, type, promptTitle);
+}
+
+// ══════════════════════════════════════════════════════
+// SAVE TO GOOGLE SHEET
+// ══════════════════════════════════════════════════════
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIBSijbzcxX3bYM4punhu9VowhJT2IajiH4MY0jpZjU4RKoZhVeveVoTwOqsFnXIbu/exec';
+const CLOUDINARY_CLOUD  = 'dclmlclyl';
+const CLOUDINARY_PRESET = 'Recordings';
+
+// Upload audio lên Cloudinary, trả về URL
+async function uploadAudio(audioBlob, filename) {
+  const formData = new FormData();
+  formData.append('file', audioBlob, filename);
+  formData.append('upload_preset', CLOUDINARY_PRESET);
+  formData.append('resource_type', 'video'); // audio dùng resource_type=video trên Cloudinary
+
+  const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/video/upload`, {
+    method: 'POST',
+    body:   formData,
+  });
+  const data = await res.json();
+  return data.secure_url || '';
+}
+
+async function saveToSheet(r, type, promptTitle) {
+  const isS  = type === 'speaking';
+  const keys = isS
+    ? ['fluency_coherence','lexical_resource','grammatical_range','pronunciation']
+    : [r.task_achievement!==undefined?'task_achievement':'task_response','coherence_cohesion','lexical_resource','grammatical_range'];
+
+  const essay = isS
+    ? (S.transcript || '(ghi âm — không có transcript)')
+    : (document.getElementById('wAnswer')?.value || '');
+
+  // Upload audio nếu là Speaking
+  let audioUrl = '';
+  if (isS && S.audioBlob) {
+    try {
+      document.getElementById('saveStatus').textContent = 'Đang upload audio...';
+      const filename = `${S.name}_speaking_${Date.now()}.webm`;
+      audioUrl = await uploadAudio(S.audioBlob, filename);
+    } catch(e) {
+      console.warn('Audio upload failed:', e);
+    }
+  }
+
+  const payload = {
+    timestamp:    new Date().toLocaleString('vi-VN'),
+    name:         S.name,
+    type:         type === 'writing' ? 'Writing' : 'Speaking',
+    prompt_title: promptTitle || '',
+    essay:        essay.substring(0, 5000),
+    overall_band: r.overall_band,
+    cr1:          r[keys[0]]?.score ?? '',
+    cc:           r[keys[1]]?.score ?? '',
+    lr:           r[keys[2]]?.score ?? '',
+    gra:          r[keys[3]]?.score ?? '',
+    feedback:     r.overall_feedback || '',
+    audio_url:    audioUrl,
+  };
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method:  'POST',
+      mode:    'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    document.getElementById('saveDot').style.background = 'var(--accent)';
+    document.getElementById('saveStatus').textContent   =
+      audioUrl ? '✅ Đã lưu Sheet + audio' : '✅ Đã lưu lên Google Sheet';
+  } catch(e) {
+    document.getElementById('saveDot').style.background = 'var(--danger)';
+    document.getElementById('saveStatus').textContent   = '⚠️ Lưu Sheet thất bại — đã lưu local';
+  }
+}
+
+function bandLabel(b) {
+  if (b>=8.5) return 'Expert User';
+  if (b>=7.5) return 'Very Good User';
+  if (b>=6.5) return 'Competent User';
+  if (b>=5.5) return 'Modest User';
+  if (b>=4.5) return 'Limited User';
+  return 'Extremely Limited User';
+}
+
+function showOverlay(msg) { document.getElementById('ovMsg').textContent=msg; document.getElementById('overlay').classList.add('show'); }
+function hideOverlay() { document.getElementById('overlay').classList.remove('show'); }
+</script>
+</body>
+</html>
