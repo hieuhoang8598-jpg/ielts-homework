@@ -177,14 +177,14 @@ textarea:focus{border-color:var(--accent)}
   </div>
   <div class="box">
     <label>Gemini API Key</label>
-    <input type="password" id="apiKey" placeholder="AIza..." oninput="saveApiKey()" />
+    <input type="password" id="apiKey" placeholder="AIza..." oninput="saveApiKey()" onkeydown="if(event.key==='Enter')document.getElementById('studentName').focus()" />
     <p class="box-note">Key chỉ dùng trong session này — không lưu lại.</p>
   </div>
   <div class="name-row" style="max-width:480px;margin:0 auto .75rem">
-    <input type="text" class="name-input" id="studentName" placeholder="Họ và tên của bạn..." maxlength="60" />
+    <input type="text" class="name-input" id="studentName" placeholder="Họ và tên của bạn..." maxlength="60" onkeydown="if(event.key==='Enter')document.getElementById('classCode').focus()" />
   </div>
   <div class="name-row">
-    <input type="text" class="name-input" id="classCode" placeholder="Mã lớp (ví dụ: IELTS-01)..." maxlength="30" />
+    <input type="text" class="name-input" id="classCode" placeholder="Mã lớp (ví dụ: IELTS-01)..." maxlength="30" onkeydown="if(event.key==='Enter')startApp()" />
     <button class="btn btn-p" onclick="startApp()">Bắt đầu →</button>
   </div>
   <div class="err" id="startErr"></div>
