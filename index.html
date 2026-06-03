@@ -380,10 +380,15 @@ async function loadPromptsFromSheet() {
   sList.innerHTML = '<div style="color:var(--muted);font-size:.84rem;padding:1rem">Đang tải đề...</div>';
 
   try {
-    // Dùng jsonp-style via script tag để bypass CORS
-    const data = await fetchWithCallback(PROMPTS_URL);
+    // Dùng allorigins proxy để bypass CORS
+    const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(PROMPTS_URL);
+    const res  = await fetch(proxyUrl);
+    const data = await res.json();
+    const json = JSON.parse(data.contents);
 
-    WRITING_PROMPTS = data
+    if (json.status !== 'ok') throw new Error('Sheet error');
+
+    WRITING_PROMPTS = json.data
       .filter(r => r.type === 'writing')
       .map(r => ({
         id:        r.id,
@@ -393,7 +398,7 @@ async function loadPromptsFromSheet() {
         prompt:    r.prompt,
       }));
 
-    SPEAKING_PROMPTS = data
+    SPEAKING_PROMPTS = json.data
       .filter(r => r.type === 'speaking')
       .map(r => ({
         id:     r.id,
@@ -411,36 +416,6 @@ async function loadPromptsFromSheet() {
     useFallbackPrompts();
     buildPromptLists();
   }
-}
-
-function fetchWithCallback(url) {
-  return new Promise((resolve, reject) => {
-    const callbackName = 'cb_' + Date.now();
-    const script = document.createElement('script');
-
-    window[callbackName] = (json) => {
-      delete window[callbackName];
-      document.body.removeChild(script);
-      if (json.status === 'ok') resolve(json.data);
-      else reject(new Error('Sheet error'));
-    };
-
-    script.src = url + '?callback=' + callbackName;
-    script.onerror = () => {
-      delete window[callbackName];
-      document.body.removeChild(script);
-      reject(new Error('Script load error'));
-    };
-    document.body.appendChild(script);
-
-    setTimeout(() => {
-      if (window[callbackName]) {
-        delete window[callbackName];
-        try { document.body.removeChild(script); } catch(_) {}
-        reject(new Error('Timeout'));
-      }
-    }, 8000);
-  });
 }
 
 function buildPromptLists() {
