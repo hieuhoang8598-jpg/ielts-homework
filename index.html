@@ -959,29 +959,34 @@ async function gradeWriting(prompt, essay, taskType) {
   const c1   = isT1 ? 'task_achievement' : 'task_response';
   const system = `You are an IELTS Writing examiner. Grade strictly by official IELTS band descriptors.
 
-SCORING RULES (very important):
-- 4 criteria scores must be WHOLE NUMBERS ONLY: 1, 2, 3, 4, 5, 6, 7, 8, 9. NO half bands for criteria.
-- When uncertain between two bands for a criterion → ALWAYS choose the LOWER band
-- Overall band = average of 4 criteria, rounded DOWN to nearest 0.5 (e.g. 6+6+7+6=25/4=6.25 → 6.0; 6+7+7+6=26/4=6.5 → 6.5; 7+7+7+6=27/4=6.75 → 6.5)
-- Min words: Task 1=150, Task 2=250. If underlength → penalize ${c1} significantly
-
-ESSAY ANNOTATION:
-- Return the student's full essay with inline corrections in the "annotated_essay" field
-- For each error wrap it: <err type="TA" fix="corrected">original text</err>
-- Types: TA=Task Achievement, CC=Coherence/Cohesion, LR=Lexical Resource, GRA=Grammar
-- Mark good phrases: <good>phrase</good>
-
+SCORING RULES:
+- 4 criteria scores must be WHOLE NUMBERS ONLY: 1-9. NO half bands for criteria.
+- When uncertain → ALWAYS choose the LOWER band
+- Overall band = average of 4 criteria, rounded DOWN to nearest 0.5 (6.25→6.0, 6.75→6.5)
+- Min words: Task 1=150, Task 2=250. Penalize if underlength.
 All feedback in Vietnamese. Quote specific examples from the essay.
 
 Respond ONLY with raw JSON, no markdown:
-{"${c1}":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"coherence_cohesion":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"lexical_resource":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"grammatical_range":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"overall_band":6,"overall_feedback":"2 câu tiếng Việt","word_count_note":"...","annotated_essay":"full essay with err and good tags","grammar_table":[{"structure":"...","formula":"...","error_example":"exact quote","correct_example":"corrected","note":"tiếng Việt"}],"vocabulary":[{"word":"...","meaning":"...","example":"...","note":"..."}],"top_improvements":[{"title":"...","detail":"tiếng Việt","original":"câu gốc","fix":"câu sửa"}]}`;
+{"${c1}":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"coherence_cohesion":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"lexical_resource":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"grammatical_range":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"overall_band":6.0,"overall_feedback":"2 câu tiếng Việt","word_count_note":"...","grammar_table":[{"structure":"...","formula":"...","error_example":"...","correct_example":"...","note":"..."}],"vocabulary":[{"word":"...","meaning":"...","example":"...","note":"..."}],"top_improvements":[{"title":"...","detail":"...","original":"...","fix":"..."}]}`;
 
   const wc = essay.trim().split(/\s+/).length;
   const essayTrimmed = essay.substring(0, 4000);
-  const raw = await callClaude(system, `IELTS Writing ${taskType} — Student: ${S.name} — ~${wc} words\n\nPROMPT:\n${prompt}\n\nESSAY:\n${essayTrimmed}`);
-  const result = JSON.parse(raw);
-  console.log('annotated_essay:', result.annotated_essay);
-  return result;
+  return JSON.parse(await callClaude(system, `IELTS Writing ${taskType} — Student: ${S.name} — ~${wc} words\n\nPROMPT:\n${prompt}\n\nESSAY:\n${essayTrimmed}`));
+}
+
+async function annotateEssay(prompt, essay, taskType) {
+  const system = `You are an IELTS Writing examiner. Annotate the student's essay with inline corrections.
+
+Rules:
+- Return the COMPLETE essay with ALL sentences, paragraph breaks preserved
+- Mark errors: <err type="TA" fix="corrected version">original text</err>
+  Types: TA=Task Achievement, CC=Coherence/Cohesion, LR=Lexical Resource, GRA=Grammar
+- Mark good phrases: <good>phrase</good>
+- Keep all unmarked text exactly as written
+- Return ONLY the annotated essay text, nothing else`;
+
+  const essayTrimmed = essay.substring(0, 4000);
+  return callClaude(system, `PROMPT:\n${prompt}\n\nESSAY:\n${essayTrimmed}`);
 }
 
 async function gradeSpeaking(prompt, transcript, part) {
@@ -1057,30 +1062,11 @@ function renderResults(r, type) {
 
   const promptTitle = isS ? S.selectedSpeaking?.title : S.selectedWriting?.title;
 
-  // Annotated essay (writing only)
-  let annotatedHtml = '';
-  if (!isS && r.annotated_essay) {
-    let annotated = r.annotated_essay
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/&lt;err type="([^"]+)" fix="([^"]+)"&gt;(.*?)&lt;\/err&gt;/gs, (_, type, fix, orig) => {
-        const colors = { TA:'#f0b45a', CC:'#5a9af0', LR:'#c05af0', GRA:'#f05a5a' };
-        const color = colors[type] || '#f0b45a';
-        return `<span style="background:rgba(240,180,90,.12);border-bottom:2px solid ${color}" title="[${type}] → ${fix}"><span style="text-decoration:line-through;opacity:.6">${orig}</span> <span style="color:${color};font-size:.85em">→ ${fix}</span></span>`;
-      })
-      .replace(/&lt;good&gt;(.*?)&lt;\/good&gt;/gs, '<span style="background:rgba(200,240,90,.15);border-bottom:2px solid var(--accent)">$1</span>');
-
-    annotatedHtml = `
-    <div class="detail-box" style="margin-bottom:1rem">
-      <h4>📝 Bài viết đã chữa</h4>
-      <div style="font-size:.78rem;color:var(--muted);margin-bottom:.75rem;display:flex;gap:1.2rem;flex-wrap:wrap">
-        <span>🟡 <span style="color:#f0b45a">TA</span></span>
-        <span>🔵 <span style="color:#5a9af0">CC</span></span>
-        <span>🟣 <span style="color:#c05af0">LR</span></span>
-        <span>🔴 <span style="color:#f05a5a">GRA</span></span>
-        <span>🟢 <span style="color:var(--accent)">Tốt</span></span>
-      </div>
-      <div style="font-size:.88rem;line-height:2;white-space:pre-wrap">${annotated}</div>
-    </div>`;
+  // Store essay for annotation tab
+  if (!isS) {
+    window._lastEssay   = document.getElementById('wAnswer')?.value || '';
+    window._lastPrompt  = S.selectedWriting?.prompt || '';
+    window._lastTaskType = S.selectedWriting?.task || 'Task 2';
   }
 
   document.getElementById('resultsPanel').innerHTML = `
@@ -1091,24 +1077,46 @@ function renderResults(r, type) {
     </div>
     <div style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">Đề: <em>${promptTitle||''}</em></div>
 
-    <div class="band-hero">
-      <div class="band-num" style="color:${accent}">${r.overall_band}<small>OVERALL</small></div>
-      <div class="band-info">
-        <h3>${bandLabel(r.overall_band)}</h3>
-        <p>${r.overall_feedback||''}</p>
-        ${r.word_count_note?`<p style="margin-top:.35rem;font-size:.76rem;color:var(--muted)">📝 ${r.word_count_note}</p>`:''}
+    ${!isS ? `
+    <!-- TAB BUTTONS -->
+    <div style="display:flex;gap:.5rem;margin-bottom:1.25rem">
+      <button onclick="switchTab('scores')" id="tabScores" class="btn btn-p" style="font-size:.8rem;padding:.5rem 1.1rem">📊 Kết quả</button>
+      <button onclick="switchTab('annotate')" id="tabAnnotate" class="btn btn-g" style="font-size:.8rem;padding:.5rem 1.1rem">📝 Bài chữa</button>
+    </div>` : ''}
+
+    <!-- TAB: SCORES -->
+    <div id="tabScoresContent">
+      <div class="band-hero">
+        <div class="band-num" style="color:${accent}">${r.overall_band}<small>OVERALL</small></div>
+        <div class="band-info">
+          <h3>${bandLabel(r.overall_band)}</h3>
+          <p>${r.overall_feedback||''}</p>
+          ${r.word_count_note?`<p style="margin-top:.35rem;font-size:.76rem;color:var(--muted)">📝 ${r.word_count_note}</p>`:''}
+        </div>
       </div>
+
+      <div class="crit-grid">${critCards}</div>
+
+      ${imps?`<div class="detail-box"><h4>🎯 Cần làm để lên band tiếp theo</h4>${imps}</div>`:''}
+      ${gramRows?`<div class="detail-box"><h4>📚 Ngữ pháp cần ôn</h4><div style="overflow-x:auto"><table class="gtable"><thead><tr><th>Cấu trúc</th><th>Công thức</th><th>Sai (từ bài)</th><th>Đúng</th><th>Lưu ý</th></tr></thead><tbody>${gramRows}</tbody></table></div></div>`:''}
+      ${vocabRows?`<div class="detail-box"><h4>💡 Từ vựng theo chủ đề</h4><div style="overflow-x:auto"><table class="vtable"><thead><tr><th>Từ / Cụm từ</th><th>Nghĩa</th><th>Ví dụ</th><th>Ghi chú</th></tr></thead><tbody>${vocabRows}</tbody></table></div></div>`:''}
     </div>
 
-    <div class="crit-grid">${critCards}</div>
-
-    ${annotatedHtml}
-
-    ${imps?`<div class="detail-box"><h4>🎯 Cần làm để lên band tiếp theo</h4>${imps}</div>`:''}
-
-    ${gramRows?`<div class="detail-box"><h4>📚 Ngữ pháp cần ôn (từ bài thực tế)</h4><div style="overflow-x:auto"><table class="gtable"><thead><tr><th>Cấu trúc</th><th>Công thức</th><th>Sai (từ bài)</th><th>Đúng</th><th>Lưu ý</th></tr></thead><tbody>${gramRows}</tbody></table></div></div>`:''}
-
-    ${vocabRows?`<div class="detail-box"><h4>💡 Từ vựng theo chủ đề</h4><div style="overflow-x:auto"><table class="vtable"><thead><tr><th>Từ / Cụm từ</th><th>Nghĩa</th><th>Ví dụ</th><th>Ghi chú</th></tr></thead><tbody>${vocabRows}</tbody></table></div></div>`:''}
+    <!-- TAB: ANNOTATE (writing only) -->
+    ${!isS ? `<div id="tabAnnotateContent" style="display:none">
+      <div class="detail-box">
+        <div style="font-size:.78rem;color:var(--muted);margin-bottom:.75rem;display:flex;gap:1.2rem;flex-wrap:wrap">
+          <span>🟡 <span style="color:#f0b45a">TA</span></span>
+          <span>🔵 <span style="color:#5a9af0">CC</span></span>
+          <span>🟣 <span style="color:#c05af0">LR</span></span>
+          <span>🔴 <span style="color:#f05a5a">GRA</span></span>
+          <span>🟢 <span style="color:var(--accent)">Tốt</span></span>
+        </div>
+        <div id="annotateBody" style="font-size:.88rem;line-height:2;white-space:pre-wrap;color:var(--muted);font-style:italic">
+          Nhấn nút "Bài chữa" để tải bản chữa chi tiết...
+        </div>
+      </div>
+    </div>` : ''}
 
     <div class="save-row"><div class="save-dot" id="saveDot"></div><span id="saveStatus">Đang lưu lên Google Sheet...</span></div>`;
 
@@ -1195,6 +1203,51 @@ async function saveToSheet(r, type, promptTitle) {
     document.getElementById('saveDot').style.background = 'var(--danger)';
     document.getElementById('saveStatus').textContent   = '⚠️ Lưu Sheet thất bại — đã lưu local';
   }
+}
+
+async function switchTab(tab) {
+  const scoresBtn       = document.getElementById('tabScores');
+  const annotateBtn     = document.getElementById('tabAnnotate');
+  const scoresContent   = document.getElementById('tabScoresContent');
+  const annotateContent = document.getElementById('tabAnnotateContent');
+
+  if (tab === 'scores') {
+    scoresBtn.className         = 'btn btn-p';
+    annotateBtn.className       = 'btn btn-g';
+    scoresContent.style.display   = 'block';
+    annotateContent.style.display = 'none';
+  } else {
+    scoresBtn.className         = 'btn btn-g';
+    annotateBtn.className       = 'btn btn-s';
+    scoresContent.style.display   = 'none';
+    annotateContent.style.display = 'block';
+
+    // Load annotation only once
+    const body = document.getElementById('annotateBody');
+    if (body && body.dataset.loaded !== '1') {
+      body.dataset.loaded = '1';
+      body.innerHTML = '<div style="color:var(--muted)">⏳ Đang tải bài chữa từ Gemini...</div>';
+      try {
+        const raw = await annotateEssay(window._lastPrompt, window._lastEssay, window._lastTaskType);
+        body.style.fontStyle = 'normal';
+        body.innerHTML = renderAnnotatedText(raw);
+      } catch(e) {
+        body.innerHTML = '<div style="color:var(--danger)">Lỗi: ' + e.message + '</div>';
+      }
+    }
+  }
+}
+
+function renderAnnotatedText(text) {
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/&lt;err type="([^"]+)" fix="([^"]+)"&gt;(.*?)&lt;\/err&gt;/gs, (_, type, fix, orig) => {
+      const colors = { TA:'#f0b45a', CC:'#5a9af0', LR:'#c05af0', GRA:'#f05a5a' };
+      const color  = colors[type] || '#f0b45a';
+      return `<span style="background:rgba(240,180,90,.1);border-bottom:2px solid ${color}" title="[${type}] → ${fix}"><span style="text-decoration:line-through;opacity:.6">${orig}</span> <span style="color:${color};font-size:.85em">→ ${fix}</span></span>`;
+    })
+    .replace(/&lt;good&gt;(.*?)&lt;\/good&gt;/gs,
+      '<span style="background:rgba(200,240,90,.15);border-bottom:2px solid var(--accent)">$1</span>');
 }
 
 function bandLabel(b) {
