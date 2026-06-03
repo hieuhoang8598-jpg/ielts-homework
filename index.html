@@ -916,7 +916,7 @@ async function callClaude(system, user, maxTokens = 2500) {
 
   for (let ki = 0; ki < keys.length; ki++) {
     const key = keys[ki];
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
 
     for (let attempt = 1; attempt <= 2; attempt++) {
       const res = await fetch(url, {
