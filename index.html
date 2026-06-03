@@ -977,8 +977,11 @@ Respond ONLY with raw JSON, no markdown:
 {"${c1}":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"coherence_cohesion":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"lexical_resource":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"grammatical_range":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"overall_band":6,"overall_feedback":"2 câu tiếng Việt","word_count_note":"...","annotated_essay":"full essay with err and good tags","grammar_table":[{"structure":"...","formula":"...","error_example":"exact quote","correct_example":"corrected","note":"tiếng Việt"}],"vocabulary":[{"word":"...","meaning":"...","example":"...","note":"..."}],"top_improvements":[{"title":"...","detail":"tiếng Việt","original":"câu gốc","fix":"câu sửa"}]}`;
 
   const wc = essay.trim().split(/\s+/).length;
-  const essayTrimmed = essay.substring(0, 2000);
-  return JSON.parse(await callClaude(system, `IELTS Writing ${taskType} — Student: ${S.name} — ~${wc} words\n\nPROMPT:\n${prompt}\n\nESSAY:\n${essayTrimmed}`));
+  const essayTrimmed = essay.substring(0, 4000);
+  const raw = await callClaude(system, `IELTS Writing ${taskType} — Student: ${S.name} — ~${wc} words\n\nPROMPT:\n${prompt}\n\nESSAY:\n${essayTrimmed}`);
+  const result = JSON.parse(raw);
+  console.log('annotated_essay:', result.annotated_essay);
+  return result;
 }
 
 async function gradeSpeaking(prompt, transcript, part) {
