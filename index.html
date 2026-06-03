@@ -154,7 +154,9 @@ textarea:focus{border-color:var(--accent)}
 .ov-card h3{font-size:.95rem;margin-bottom:.3rem}
 .ov-card p{color:var(--muted);font-size:.78rem}
 
-@media(max-width:580px){
+.filter-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.6rem 1rem;font-size:.84rem;cursor:pointer;color:var(--text);transition:all .2s;font-family:'DM Sans',sans-serif}
+.filter-btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+.filter-btn.filter-s:hover{border-color:var(--speaking);color:var(--speaking)}
   header{padding:1rem 1.1rem}main{padding:1.5rem 1rem 4rem}
   .task-grid{grid-template-columns:1fr}.crit-grid{grid-template-columns:1fr}
   .band-hero{flex-direction:column;text-align:center}.name-row{flex-direction:column}
@@ -213,31 +215,96 @@ textarea:focus{border-color:var(--accent)}
   </div>
 </div>
 
-<!-- STEP 2A: PICK WRITING PROMPT -->
-<div class="step" id="step-pick-writing">
+<!-- STEP 1B: FILTER WRITING -->
+<div class="step" id="step-filter-writing">
   <div class="dots"><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
   <div class="pick-header">
-    <h2>Chọn đề Writing</h2>
-    <p>Chọn 1 đề bên dưới để bắt đầu làm bài</p>
+    <h2>Chọn dạng bài Writing</h2>
+    <p>Chọn Task và dạng đề</p>
+  </div>
+  <div style="margin-bottom:1.25rem">
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:.65rem;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em">Task 1</div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <button class="filter-btn" onclick="applyFilter('writing','Task 1','Dynamic')">📈 Dynamic</button>
+      <button class="filter-btn" onclick="applyFilter('writing','Task 1','Static')">📊 Static</button>
+      <button class="filter-btn" onclick="applyFilter('writing','Task 1','Process')">🔄 Process</button>
+      <button class="filter-btn" onclick="applyFilter('writing','Task 1','Map')">🗺 Map</button>
+      <button class="filter-btn" onclick="applyFilter('writing','Task 1','Others')">📋 Others</button>
+    </div>
+  </div>
+  <div>
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:.65rem;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em">Task 2</div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <button class="filter-btn" onclick="applyFilter('writing','Task 2','Opinion')">💬 Opinion</button>
+      <button class="filter-btn" onclick="applyFilter('writing','Task 2','Discussion')">⚖️ Discussion</button>
+      <button class="filter-btn" onclick="applyFilter('writing','Task 2','Problem Solution')">🔧 Problem Solution</button>
+      <button class="filter-btn" onclick="applyFilter('writing','Task 2','Advantages Disadvantages')">📝 Adv & Dis</button>
+      <button class="filter-btn" onclick="applyFilter('writing','Task 2','Others')">📋 Others</button>
+    </div>
+  </div>
+  <div class="btn-row" style="margin-top:1.5rem">
+    <button class="btn btn-g" onclick="showStep('choose')">← Quay lại</button>
+  </div>
+</div>
+
+<!-- STEP 1C: FILTER SPEAKING -->
+<div class="step" id="step-filter-speaking">
+  <div class="dots"><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
+  <div class="pick-header">
+    <h2>Chọn dạng bài Speaking</h2>
+    <p>Chọn Part và level</p>
+  </div>
+  <div style="margin-bottom:1.25rem">
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:.65rem;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em">Part 1</div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <button class="filter-btn filter-s" onclick="applyFilter('speaking','Part 1','Basic')">🌱 Basic</button>
+      <button class="filter-btn filter-s" onclick="applyFilter('speaking','Part 1','Advanced')">🚀 Advanced</button>
+    </div>
+  </div>
+  <div style="margin-bottom:1.25rem">
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:.65rem;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em">Part 2</div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <button class="filter-btn filter-s" onclick="applyFilter('speaking','Part 2','Basic')">🌱 Basic</button>
+      <button class="filter-btn filter-s" onclick="applyFilter('speaking','Part 2','Advanced')">🚀 Advanced</button>
+    </div>
+  </div>
+  <div>
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:.65rem;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em">Part 3</div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <button class="filter-btn filter-s" onclick="applyFilter('speaking','Part 3','Basic')">🌱 Basic</button>
+      <button class="filter-btn filter-s" onclick="applyFilter('speaking','Part 3','Advanced')">🚀 Advanced</button>
+    </div>
+  </div>
+  <div class="btn-row" style="margin-top:1.5rem">
+    <button class="btn btn-g" onclick="showStep('choose')">← Quay lại</button>
+  </div>
+</div>
+
+<!-- STEP 2A: PICK WRITING PROMPT -->
+<div class="step" id="step-pick-writing">
+  <div class="dots"><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div><div class="dot"></div></div>
+  <div class="pick-header">
+    <h2 id="pickWritingTitle">Chọn đề Writing</h2>
+    <p id="pickWritingSubtitle">Chọn 1 đề bên dưới để bắt đầu làm bài</p>
   </div>
   <div class="prompt-list" id="writingList"></div>
   <div class="btn-row">
     <button class="btn btn-p" id="startWritingBtn" onclick="startWriting()" disabled>Làm bài này →</button>
-    <button class="btn btn-g" onclick="showStep('choose')">← Quay lại</button>
+    <button class="btn btn-g" onclick="showStep('step-filter-writing')">← Đổi dạng</button>
   </div>
 </div>
 
 <!-- STEP 2B: PICK SPEAKING PROMPT -->
 <div class="step" id="step-pick-speaking">
-  <div class="dots"><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
+  <div class="dots"><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div><div class="dot"></div></div>
   <div class="pick-header">
-    <h2>Chọn đề Speaking</h2>
+    <h2 id="pickSpeakingTitle">Chọn đề Speaking</h2>
     <p>Chọn 1 cue card bên dưới để bắt đầu ghi âm</p>
   </div>
   <div class="prompt-list" id="speakingList"></div>
   <div class="btn-row">
     <button class="btn btn-s" id="startSpeakingBtn" onclick="startSpeaking()" disabled>Làm bài này →</button>
-    <button class="btn btn-g" onclick="showStep('choose')">← Quay lại</button>
+    <button class="btn btn-g" onclick="showStep('step-filter-speaking')">← Đổi dạng</button>
   </div>
 </div>
 
@@ -343,190 +410,41 @@ textarea:focus{border-color:var(--accent)}
 // DANH SÁCH ĐỀ — Thêm/sửa đề tại đây
 // ══════════════════════════════════════════════════════
 const WRITING_PROMPTS = [
-  // ── TASK 1 ──
-  {
-    id: 'w1', task: 'Task 1',
-    title: 'Workers migrating to Australia (Dynamic)',
-    image_url: 'task 1_dynamic.png',
-    prompt: 'The chart below gives information on the numbers of workers in different occupations who migrated to Australia between 2009 and 2012.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'
-  },
-  {
-    id: 'w2', task: 'Task 1',
-    title: 'Automobile survey in Europe (Static)',
-    image_url: 'task 1_static.jpg',
-    prompt: 'The bar charts display the results from a 2009 survey regarding people\'s automobile in a European country.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'
-  },
-  {
-    id: 'w3', task: 'Task 1',
-    title: 'Recycling aluminium cans (Process)',
-    image_url: 'task 1_process.jpg',
-    prompt: 'The diagram below shows the stages in the recycling of aluminum drinks can.\n\nSummarize the information by selecting and reporting the main features, and make comparisons where relevant.'
-  },
-  {
-    id: 'w4', task: 'Task 1',
-    title: 'Beachfront area in Australia (Map)',
-    image_url: 'task 1_map.jpg',
-    prompt: 'The maps below show a beachfront area in Australia in 1950 and the same area today.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'
-  },
-  {
-    id: 'w5', task: 'Task 1',
-    title: 'Aid to developing countries (Dynamic)',
-    image_url: 'task 1_dynamic 02.png',
-    prompt: 'The table shows the amount of money given to developing countries by the USA, EU countries and other countries from 2006 to 2010 (Figures are in millions of dollars).\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'
-  },
-  {
-    id: 'w6', task: 'Task 1',
-    title: 'World\'s water distribution (Static)',
-    image_url: 'task 1_static 02.jpg',
-    prompt: 'The charts below show the distribution of the world\'s water and the use of water in three countries.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'
-  },
-  {
-    id: 'w7', task: 'Task 1',
-    title: 'Growing and preparing pineapples (Process)',
-    image_url: 'task 1_process 02.jpg',
-    prompt: 'The diagram below shows the process of growing and preparing pineapples and pineapple products.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'
-  },
-  {
-    id: 'w8', task: 'Task 1',
-    title: 'Student common room (Map)',
-    image_url: 'task 1_map 02.png',
-    prompt: 'The plans show a student common room from five years ago and now.\n\nSummarize the information by selecting and reporting the main features and make comparisons where relevant.'
-  },
-  {
-    id: 'w9', task: 'Task 1',
-    title: 'Village in 1910 and 2010 (Map)',
-    image_url: 'task 1_map 03.jpg',
-    prompt: 'The maps below show a part of a village in 1910 and the same part of the village in 2010.\n\nSummarize the information by selecting and reporting the main features and make comparisons where relevant.'
-  },
-  // ── TASK 2 ──
-  {
-    id: 'w10', task: 'Task 2',
-    title: 'Working hard — reasons and effects',
-    image_url: '',
-    prompt: 'In education and employment, some people work harder than others.\n\nWhy do some people work harder? Is it always a good thing to work hard?'
-  },
-  {
-    id: 'w11', task: 'Task 2',
-    title: 'Advertising and unnecessary products',
-    image_url: '',
-    prompt: 'The main purpose of advertising is to increase the sales of products that people don\'t really need.\n\nTo what extent do you agree or disagree?'
-  },
-  {
-    id: 'w12', task: 'Task 2',
-    title: 'Young criminals and adult punishment',
-    image_url: '',
-    prompt: 'Some people believe that young people who commit serious crimes should be punished in the same way as adults.\n\nDo you agree or disagree?'
-  },
-  {
-    id: 'w13', task: 'Task 2',
-    title: 'Free libraries vs. internet access',
-    image_url: '',
-    prompt: 'Some people think the government should establish free libraries in each town. Others believe that it is a waste of money since people can access the Internet to obtain information.\n\nDiscuss both views and give your own opinion.'
-  },
-  {
-    id: 'w14', task: 'Task 2',
-    title: 'Cyclists and road safety test',
-    image_url: '',
-    prompt: 'Some experts say for road safety cyclists should pass a test before being allowed on public roads.\n\nTo what extent do you agree or disagree?'
-  },
-  {
-    id: 'w15', task: 'Task 2',
-    title: 'Minimum driving age and road safety',
-    image_url: '',
-    prompt: 'Some people think that the best way to improve road safety is to increase the minimum legal age for driving a car or motorbike.\n\nTo what extent do you agree or disagree?'
-  },
-  {
-    id: 'w16', task: 'Task 2',
-    title: 'International news as a school subject',
-    image_url: '',
-    prompt: 'Some believe secondary students should learn International news as a subject at school, while some think it\'s a waste of time.\n\nDiscuss both views and give your opinion.'
-  }
+  {id:'w1',task:'Task 1',category:'Dynamic',title:'Workers migrating to Australia',image_url:'task 1_dynamic.png',prompt:'The chart below gives information on the numbers of workers in different occupations who migrated to Australia between 2009 and 2012.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'},
+  {id:'w2',task:'Task 1',category:'Static',title:'Automobile survey in Europe',image_url:'task 1_static.jpg',prompt:'The bar charts display the results from a 2009 survey regarding people\'s automobile in a European country.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'},
+  {id:'w3',task:'Task 1',category:'Process',title:'Recycling aluminium cans',image_url:'task 1_process.jpg',prompt:'The diagram below show the stages in the recycling of aluminum drinks can.\n\nSummarize the information by selecting and reporting the main features, and make comparisons where relevant.'},
+  {id:'w4',task:'Task 1',category:'Map',title:'Beachfront area in Australia',image_url:'task 1_map.jpg',prompt:'The maps below show a beachfront area in Australia in 1950 and the same area today.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'},
+  {id:'w5',task:'Task 1',category:'Dynamic',title:'Aid to developing countries',image_url:'task 1_dynamic 02.png',prompt:'The table shows the amount of money given to developing countries by the USA, EU countries and other countries from 2006 to 2010 (Figures are in millions of dollars).\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'},
+  {id:'w6',task:'Task 1',category:'Static',title:'World\'s water distribution',image_url:'task 1_static 02.jpg',prompt:'The charts below show the distribution of the world\'s water and the use of water in three countries.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'},
+  {id:'w7',task:'Task 1',category:'Process',title:'Growing and preparing pineapples',image_url:'task 1_process 02.jpg',prompt:'The diagram below shows the process of growing and preparing pineapples and pineapple products.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.'},
+  {id:'w8',task:'Task 1',category:'Map',title:'Student common room',image_url:'task 1_map 02.png',prompt:'The plans show a student common room from five years ago and now.\n\nSummarize the information by selecting and reporting the main features and make comparisons where relevant.'},
+  {id:'w9',task:'Task 1',category:'Map',title:'Village in 1910 and 2010',image_url:'task 1_map 03.jpg',prompt:'The maps below show a part of a village in 1910 and the same part of the village in 2010.\n\nSummarize the information by selecting and reporting the main features and make comparisons where relevant.'},
+  {id:'w10',task:'Task 2',category:'Others',title:'Working hard — reasons and effects',image_url:'',prompt:'In education and employment, some people work harder than others.\n\nWhy do some people work harder? Is it always a good thing to work hard?'},
+  {id:'w11',task:'Task 2',category:'Opinion',title:'Advertising and unnecessary products',image_url:'',prompt:'The main purpose of advertising is to increase the sales of products that people don\'t really need.\n\nTo what extent do you agree or disagree?'},
+  {id:'w12',task:'Task 2',category:'Opinion',title:'Young criminals and adult punishment',image_url:'',prompt:'Some people believe that young people who commit serious crimes should be punished in the same way as adults.\n\nDo you agree or disagree?'},
+  {id:'w13',task:'Task 2',category:'Discussion',title:'Free libraries vs. internet access',image_url:'',prompt:'Some people think the government should establish free libraries in each town. Others believe that it is a waste of money since people can access the Internet to obtain information.\n\nDiscuss both views and give your own opinion.'},
+  {id:'w14',task:'Task 2',category:'Opinion',title:'Cyclists and road safety test',image_url:'',prompt:'Some experts say for road safety cyclists should pass a test before being allowed on public roads.\n\nTo what extent do you agree or disagree?'},
+  {id:'w15',task:'Task 2',category:'Opinion',title:'Minimum driving age and road safety',image_url:'',prompt:'Some people think that the best way to improve road safety is to increase the minimum legal age for driving a car or motorbike.\n\nTo what extent do you agree or disagree?'},
+  {id:'w16',task:'Task 2',category:'Discussion',title:'International news as a school subject',image_url:'',prompt:'Some believe secondary students should learn International news as a subject at school, while some think it\'s a waste of time.\n\nDiscuss both views and give your opinion.'}
 ];
 
 const SPEAKING_PROMPTS = [
-  // ── PART 1 ──
-  {
-    id: 's1', part: 'Part 1',
-    title: 'Buildings / Scenery / Shoes',
-    prompt: 'BUILDINGS\n• Do you want to live in a tall building?\n• Is there a building that you would like to visit?\n• Do you take photos of buildings?\n• Are there tall buildings near your home?\n\nSCENERY\n• Do you like to take scenery pictures?\n• Do you prefer the mountains or the sea?\n• What are the most beautiful sights you have seen while travelling?\n\nSHOES\n• Which do you prefer, fashionable shoes or comfortable shoes?\n• How much money do you usually spend on shoes?\n• Have you ever bought shoes online?'
-  },
-  {
-    id: 's2', part: 'Part 1',
-    title: 'Reading / Rain / Colors',
-    prompt: 'READING\n• Do you prefer scanning or detailed reading?\n• When do you need to read carefully, and when not?\n• Do you prefer to read on paper or on a screen?\n\nRAIN\n• Do you like rainy days? Why?\n• Does it rain much in your city?\n• Would you like to live in a dry or wet place?\n\nCOLORS\n• What is your favorite color?\n• Do you usually wear clothes in your favorite color?\n• Are there any colors that have a special meaning in your country?'
-  },
-  {
-    id: 's3', part: 'Part 1',
-    title: 'Typing / Public places / Chocolate',
-    prompt: 'TYPING\n• Do you prefer typing or handwriting?\n• When did you learn how to type on a keyboard?\n• How do you improve your typing?\n\nPUBLIC PLACES\n• Do you usually go to public places with your friends?\n• Do you wear headphones when you are in public places?\n• Have you ever talked with someone you don\'t know in public places?\n\nCHOCOLATE\n• Do you like eating chocolate? Why or why not?\n• How often do you eat chocolate?\n• Why do you think chocolate is popular around the world?'
-  },
-  {
-    id: 's4', part: 'Part 1',
-    title: 'Flowers / Advertisement',
-    prompt: 'FLOWERS\n• Do you love flowers?\n• Are there a lot of flowers where you live?\n• Do people in your country often send flowers to others?\n• Are there any flowers that have special meanings in Vietnam?\n\nADVERTISEMENT\n• Do you like advertisements?\n• What kind of advertising do you like?\n• Do you often see advertisements when you are on your phone or computer?\n• Is there an advertisement that made an impression on you when you were a child?'
-  },
-  {
-    id: 's5', part: 'Part 1',
-    title: 'Taking photos / Bags',
-    prompt: 'TAKING PHOTOS\n• Do you like taking photos?\n• Do you like taking selfies?\n• What is your favorite family photo?\n• Do you want to improve your photography skills?\n\nBAGS\n• Do you usually carry a bag?\n• Do you change your bags often?\n• What kind of bags would you use when traveling?\n• Is a bag an ideal gift?'
-  },
-  // ── PART 2 ──
-  {
-    id: 's6', part: 'Part 2',
-    title: 'An unusual meal',
-    prompt: 'Describe an unusual meal you had.\n\nYou should say:\n• Who you were with\n• Where you went\n• When it happened\n\nAnd explain why it was unusual.'
-  },
-  {
-    id: 's7', part: 'Part 2',
-    title: 'A natural talent you want to improve',
-    prompt: 'Describe a natural talent you want to improve like sport, music, etc.\n\nYou should say:\n• What it is\n• When you discovered it\n• How you want to improve it\n\nAnd explain how you feel about it.'
-  },
-  {
-    id: 's8', part: 'Part 2',
-    title: 'Preparing for a happy event',
-    prompt: 'Describe a time when you prepared for a happy event successfully.\n\nYou should say:\n• What the event was\n• How you prepared for it\n• Who helped you organize it\n\nAnd explain why you think it was a successful event.'
-  },
-  {
-    id: 's9', part: 'Part 2',
-    title: 'An interesting traditional story',
-    prompt: 'Describe an interesting traditional story.\n\nYou should say:\n• What the story is about\n• When/how you knew it\n• Who told you the story\n\nAnd explain how you felt when you first heard it.'
-  },
-  {
-    id: 's10', part: 'Part 2',
-    title: 'A time when someone apologized to you',
-    prompt: 'Describe a time when someone apologized to you.\n\nYou should say:\n• When it happened\n• Who this person is\n• Why he/she apologized to you\n\nAnd explain how you felt about it.'
-  },
-  {
-    id: 's11', part: 'Part 2',
-    title: 'A piece of technology difficult to use',
-    prompt: 'Describe a piece of technology that you feel difficult to use.\n\nYou should say:\n• When did you get it?\n• What did you get it for?\n• How often do you use it?\n\nAnd explain how you feel about it.'
-  },
-  {
-    id: 's12', part: 'Part 2',
-    title: 'A famous person you would like to meet',
-    prompt: 'Describe a famous person you would like to meet.\n\nYou should say:\n• Who he/she is\n• What he/she is famous for\n• What you would do if you met him/her\n\nAnd explain why you would like to meet him/her.'
-  },
-  // ── PART 3 ──
-  {
-    id: 's13', part: 'Part 3',
-    title: 'Libraries and reading',
-    prompt: 'LIBRARIES & READING\n• What should we do to prevent modern libraries from closing down?\n• Have libraries changed a lot with the development of the internet?\n• Which one is better, paper books or e-books?\n• Do you think old people spend more time reading than young people?\n• What should the government do to make libraries better?\n• What are the types of books that young people like to read?'
-  },
-  {
-    id: 's14', part: 'Part 3',
-    title: 'Fame and famous people',
-    prompt: 'FAME & FAMOUS PEOPLE\n• Do you think that famous people are generally happier than ordinary people?\n• What qualities does a person need to have in order to be famous?\n• Is it easier or more difficult to achieve fame today than in your grandparents\' time?\n• Do you think more is expected from famous people than ordinary citizens?'
-  },
-  {
-    id: 's15', part: 'Part 3',
-    title: 'Technology and older people',
-    prompt: 'TECHNOLOGY\n• Do you find it difficult to use the latest technology?\n• How will older people use technology?'
-  },
-  {
-    id: 's16', part: 'Part 3',
-    title: 'Restaurants and unusual food',
-    prompt: 'RESTAURANTS & FOOD\n• What are the advantages and disadvantages of eating in restaurants?\n• What fast food is there in your country?\n• Why do some people choose to eat out instead of ordering takeout?\n• Do people in your country value food culture?\n• What are some reasons why people might choose to eat unusual or exotic foods?\n• What are some challenges that restaurants might face when serving unusual foods?'
-  }
+  {id:'s1',part:'Part 1',category:'Advanced',title:'Buildings / Scenery / Shoes',prompt:'BUILDINGS\n• Do you want to live in a tall building?\n• Is there a building that you would like to visit?\n• Do you take photos of buildings?\n• Are there tall buildings near your home?\n\nSCENERY\n• Do you like to take scenery pictures?\n• Do you prefer the mountains or the sea?\n• Do you look out the window at the scenery when travelling?\n• What are the most beautiful sights you have seen while travelling?\n\nSHOES\n• Which do you prefer, fashionable shoes or comfortable shoes?\n• How much money do you usually spend on shoes?\n• Have you ever bought shoes online?\n• Do you like buying shoes? How often?'},
+  {id:'s2',part:'Part 1',category:'Basic',title:'Reading / Rain / Colors',prompt:'READING\n• Do you prefer scanning or detailed reading?\n• When do you need to read carefully, and when not?\n• Do you prefer to read on paper or on a screen?\n• Do you like reading?\n\nRAIN\n• Do you like rainy days? Why?\n• Does it rain much in your city?\n• Would you like to live in a dry or wet place?\n• Would you change your plan if it rained?\n\nCOLORS\n• What is your favorite color?\n• Do you usually wear clothes in your favorite color?\n• Are there any colors that have a special meaning in your country?'},
+  {id:'s3',part:'Part 1',category:'Advanced',title:'Typing / Public places / Chocolate',prompt:'TYPING\n• Do you prefer typing or handwriting?\n• When did you learn how to type on a keyboard?\n• Do you type on a desktop or laptop keyboard every day?\n• How do you improve your typing?\n\nPUBLIC PLACES\n• Do you usually go to public places with your friends?\n• Do you wear headphones when you are in public places?\n• Have you ever talked with someone you don\'t know in public places?\n\nCHOCOLATE\n• Do you like eating chocolate? Why or why not?\n• How often do you eat chocolate?\n• Why do you think chocolate is popular around the world?'},
+  {id:'s4',part:'Part 1',category:'Basic',title:'Flowers / Advertisement',prompt:'FLOWERS\n• Do you love flowers?\n• Are there a lot of flowers where you live?\n• Do people in your country often send flowers to others?\n• Are there any flowers that have special meanings in Vietnam?\n\nADVERTISEMENT\n• Do you like advertisements?\n• What kind of advertising do you like?\n• Do you often see advertisements when you are on your phone or computer?\n• Is there an advertisement that made an impression on you when you were a child?'},
+  {id:'s5',part:'Part 1',category:'Advanced',title:'Taking photos / Bags',prompt:'TAKING PHOTOS\n• Do you like taking photos?\n• Do you like taking selfies?\n• What is your favorite family photo?\n• Do you want to improve your photography skills?\n\nBAGS\n• Do you usually carry a bag?\n• Do you change your bags often?\n• What kind of bags would you use when traveling?\n• Is a bag an ideal gift?\n• Did you use a backpack when you were a child?'},
+  {id:'s6',part:'Part 2',category:'Advanced',title:'An unusual meal',prompt:'Describe an unusual meal you had.\n\nYou should say:\n• Who you were with\n• Where you went\n• When it happened\n\nAnd explain why it was unusual.'},
+  {id:'s7',part:'Part 2',category:'Basic',title:'A natural talent you want to improve',prompt:'Describe a natural talent you want to improve like sport, music, etc.\n\nYou should say:\n• What is it?\n• When did you discover it?\n• How do you want to improve it?\n\nAnd how do you feel about it?'},
+  {id:'s8',part:'Part 2',category:'Basic',title:'Preparing for a happy event',prompt:'Describe a time when you prepared for a happy event successfully.\n\nYou should say:\n• What the event was\n• How you prepared for it\n• Who helped you to organize it\n\nAnd explain why you think it was a successful event.'},
+  {id:'s9',part:'Part 2',category:'Basic',title:'An interesting traditional story',prompt:'Describe an interesting traditional story.\n\nYou should say:\n• What the story is about\n• When/how you knew it\n• Who told you the story\n\nAnd explain how you felt when you first heard it.'},
+  {id:'s10',part:'Part 2',category:'Basic',title:'A time when someone apologized to you',prompt:'Describe a time when someone apologized to you.\n\nYou should say:\n• When it happened\n• Who this person is\n• Why he/she apologized to you\n\nAnd explain how you felt about it.'},
+  {id:'s11',part:'Part 2',category:'Basic',title:'A piece of technology difficult to use',prompt:'Describe a piece of technology that you feel difficult to use.\n\nYou should say:\n• When did you get it?\n• What did you get it for?\n• How often do you use it?\n\nAnd explain how you feel about it.'},
+  {id:'s12',part:'Part 2',category:'Basic',title:'A famous person you would like to meet',prompt:'Describe a famous person you would like to meet.\n\nYou should say:\n• Who is he/she\n• What is he/she famous for\n• What you would do if you meet him/her\n\nAnd explain why you would like to meet him/her.'},
+  {id:'s13',part:'Part 3',category:'Advanced',title:'Libraries and reading',prompt:'• What should we do to prevent modern libraries from closing down?\n• Have libraries changed a lot with the development of the internet?\n• Which one is better, paper books or e-books?\n• Do you think old people spend more time reading than young people?\n• What should the government do to make libraries better?\n• What are the types of books that young people like to read?'},
+  {id:'s14',part:'Part 3',category:'Advanced',title:'Fame and famous people',prompt:'• Do you think that famous people are generally happier than ordinary people?\n• What qualities does a person need to have in order to be famous?\n• Is it easier or more difficult to achieve fame today than in your grandparents\' time?\n• Do you think more is expected from famous people than ordinary citizens?'},
+  {id:'s15',part:'Part 3',category:'Advanced',title:'Technology and older people',prompt:'• Do you find it difficult to use the latest technology?\n• How will older people use technology?'},
+  {id:'s16',part:'Part 3',category:'Advanced',title:'Restaurants and unusual food',prompt:'• What are the advantages and disadvantages of eating in restaurants?\n• What fast food are there in your country?\n• Do people eat fast food at home?\n• Why do some people choose to eat out instead of ordering takeout?\n• Do people in your country value food culture?\n• What are some reasons why people might choose to eat unusual or exotic foods?'}
 ];
 
 // ══════════════════════════════════════════════════════
@@ -623,8 +541,64 @@ function saveApiKey() {
 
 function chooseType(type) {
   S.type = type;
-  if (type === 'writing') showStep('step-pick-writing');
-  else showStep('step-pick-speaking');
+  if (type === 'writing') showStep('step-filter-writing');
+  else showStep('step-filter-speaking');
+}
+
+function applyFilter(type, taskPart, category) {
+  S.type = type;
+  if (type === 'writing') {
+    const filtered = WRITING_PROMPTS.filter(p =>
+      p.task === taskPart && p.category === category
+    );
+    const wList = document.getElementById('writingList');
+    wList.innerHTML = '';
+    document.getElementById('startWritingBtn').disabled = true;
+    document.getElementById('pickWritingTitle').textContent = `Writing ${taskPart} — ${category}`;
+    document.getElementById('pickWritingSubtitle').textContent = `${filtered.length} đề — chọn 1 để bắt đầu`;
+
+    if (filtered.length === 0) {
+      wList.innerHTML = '<div style="color:var(--muted);font-size:.84rem;padding:1rem">Chưa có đề cho dạng này.</div>';
+    } else {
+      filtered.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'prompt-item';
+        div.id = 'wi-' + p.id;
+        div.onclick = () => selectWriting(p.id);
+        div.innerHTML = `
+          <div class="prompt-num">${p.task} · ${p.category} · #${i+1}</div>
+          <div class="prompt-title">${p.title}</div>
+          <div class="prompt-preview">${p.prompt.replace(/\n/g,' ')}</div>`;
+        wList.appendChild(div);
+      });
+    }
+    showStep('step-pick-writing');
+  } else {
+    const filtered = SPEAKING_PROMPTS.filter(p =>
+      p.part === taskPart && p.category === category
+    );
+    const sList = document.getElementById('speakingList');
+    sList.innerHTML = '';
+    document.getElementById('startSpeakingBtn').disabled = true;
+    document.getElementById('pickSpeakingTitle').textContent = `Speaking ${taskPart} — ${category}`;
+
+    if (filtered.length === 0) {
+      sList.innerHTML = '<div style="color:var(--muted);font-size:.84rem;padding:1rem">Chưa có đề cho dạng này.</div>';
+    } else {
+      filtered.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'prompt-item';
+        div.id = 'si-' + p.id;
+        div.onclick = () => selectSpeaking(p.id);
+        div.innerHTML = `
+          <div class="prompt-num">${p.part} · ${p.category} · #${i+1}</div>
+          <div class="prompt-title">${p.title}</div>
+          <div class="prompt-preview">${p.prompt.replace(/\n/g,' ')}</div>`;
+        sList.appendChild(div);
+      });
+    }
+    showStep('step-pick-speaking');
+  }
 }
 
 // ══════════════════════════════════════════════════════
