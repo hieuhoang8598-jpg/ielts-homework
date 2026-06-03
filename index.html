@@ -957,30 +957,44 @@ async function callClaude(system, user, maxTokens = 2500) {
 async function gradeWriting(prompt, essay, taskType) {
   const isT1 = taskType && taskType.includes('1');
   const c1   = isT1 ? 'task_achievement' : 'task_response';
-  const system = `You are an IELTS Writing examiner. Grade by official band descriptors (0-9, half-bands).
-Rules: fully fit positive features at band; negative features LIMIT score; uncertain → choose LOWER band.
-Min words: Task 1=150, Task 2=250. Penalize if underlength.
-All feedback in Vietnamese. Be concise — max 2 sentences per field.
+  const system = `You are an IELTS Writing examiner. Grade strictly by official IELTS band descriptors.
 
-IMPORTANT for top_improvements: You MUST quote the exact sentence from the student's essay, then show the corrected version. Never give general advice without a specific example from the essay.
+SCORING RULES (very important):
+- 4 criteria scores must be WHOLE NUMBERS ONLY: 1, 2, 3, 4, 5, 6, 7, 8, 9. NO half bands for criteria.
+- When uncertain between two bands for a criterion → ALWAYS choose the LOWER band
+- Overall band = average of 4 criteria, rounded DOWN to nearest 0.5 (e.g. 6+6+7+6=25/4=6.25 → 6.0; 6+7+7+6=26/4=6.5 → 6.5; 7+7+7+6=27/4=6.75 → 6.5)
+- Min words: Task 1=150, Task 2=250. If underlength → penalize ${c1} significantly
+
+ESSAY ANNOTATION:
+- Return the student's full essay with inline corrections in the "annotated_essay" field
+- For each error wrap it: <err type="TA" fix="corrected">original text</err>
+- Types: TA=Task Achievement, CC=Coherence/Cohesion, LR=Lexical Resource, GRA=Grammar
+- Mark good phrases: <good>phrase</good>
+
+All feedback in Vietnamese. Quote specific examples from the essay.
 
 Respond ONLY with raw JSON, no markdown:
-{"${c1}":{"score":6.5,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"coherence_cohesion":{"score":6.0,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"lexical_resource":{"score":6.5,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"grammatical_range":{"score":6.0,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"overall_band":6.5,"overall_feedback":"2 câu tiếng Việt","word_count_note":"...","grammar_table":[{"structure":"...","formula":"...","error_example":"exact quote from essay","correct_example":"corrected version","note":"giải thích tiếng Việt"}],"vocabulary":[{"word":"...","meaning":"...","example":"...","note":"..."}],"top_improvements":[{"title":"...","detail":"lý do cụ thể tiếng Việt","original":"câu gốc từ bài học viên","fix":"câu đã sửa hoàn chỉnh"}]}`;
-  const wc  = essay.trim().split(/\s+/).length;
-  // Limit essay to 2000 chars to avoid overflow
+{"${c1}":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"coherence_cohesion":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"lexical_resource":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"grammatical_range":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"overall_band":6,"overall_feedback":"2 câu tiếng Việt","word_count_note":"...","annotated_essay":"full essay with err and good tags","grammar_table":[{"structure":"...","formula":"...","error_example":"exact quote","correct_example":"corrected","note":"tiếng Việt"}],"vocabulary":[{"word":"...","meaning":"...","example":"...","note":"..."}],"top_improvements":[{"title":"...","detail":"tiếng Việt","original":"câu gốc","fix":"câu sửa"}]}`;
+
+  const wc = essay.trim().split(/\s+/).length;
   const essayTrimmed = essay.substring(0, 2000);
   return JSON.parse(await callClaude(system, `IELTS Writing ${taskType} — Student: ${S.name} — ~${wc} words\n\nPROMPT:\n${prompt}\n\nESSAY:\n${essayTrimmed}`));
 }
 
 async function gradeSpeaking(prompt, transcript, part) {
-  const system = `You are an IELTS Speaking examiner. Grade by official band descriptors (0-9, half-bands).
-Evaluating from transcript — fluency/pronunciation approximate.
-All feedback in Vietnamese. Be concise — max 2 sentences per field.
+  const system = `You are an IELTS Speaking examiner. Grade strictly by official IELTS Speaking band descriptors.
+
+SCORING RULES (very important):
+- 4 criteria scores must be WHOLE NUMBERS ONLY: 1, 2, 3, 4, 5, 6, 7, 8, 9. NO half bands for criteria.
+- When uncertain between two bands for a criterion → ALWAYS choose the LOWER band
+- Overall band = average of 4 criteria, rounded DOWN to nearest 0.5 (e.g. 6+6+7+6=25/4=6.25 → 6.0; 6+7+7+6=26/4=6.5 → 6.5)
+- Evaluating from transcript — note fluency/pronunciation are approximate
+
+All feedback in Vietnamese. Quote specific examples from the transcript.
 
 Respond ONLY with raw JSON, no markdown:
-{"fluency_coherence":{"score":6.0,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"lexical_resource":{"score":6.5,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"grammatical_range":{"score":6.0,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"pronunciation":{"score":6.0,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"overall_band":6.0,"overall_feedback":"2 câu tiếng Việt","grammar_table":[{"structure":"...","formula":"...","error_example":"...","correct_example":"...","note":"..."}],"vocabulary":[{"word":"...","meaning":"...","example":"...","note":"..."}],"top_improvements":[{"title":"...","detail":"...","fix":"..."}]}`;
+{"fluency_coherence":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"lexical_resource":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"grammatical_range":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"pronunciation":{"score":6,"strengths":["..."],"weaknesses":["..."],"descriptor_reason":"...","to_next_band":"..."},"overall_band":6,"overall_feedback":"2 câu tiếng Việt","grammar_table":[{"structure":"...","formula":"...","error_example":"...","correct_example":"...","note":"..."}],"vocabulary":[{"word":"...","meaning":"...","example":"...","note":"..."}],"top_improvements":[{"title":"...","detail":"...","original":"...","fix":"..."}]}`;
 
-  // Limit transcript to 1500 chars to avoid overflow
   const tx = transcript.substring(0, 1500);
   return JSON.parse(await callClaude(system, `IELTS Speaking ${part} — Student: ${S.name}\n\nCUE CARD:\n${prompt}\n\nTRANSCRIPT:\n${tx}`));
 }
@@ -1040,6 +1054,32 @@ function renderResults(r, type) {
 
   const promptTitle = isS ? S.selectedSpeaking?.title : S.selectedWriting?.title;
 
+  // Annotated essay (writing only)
+  let annotatedHtml = '';
+  if (!isS && r.annotated_essay) {
+    let annotated = r.annotated_essay
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/&lt;err type="([^"]+)" fix="([^"]+)"&gt;(.*?)&lt;\/err&gt;/gs, (_, type, fix, orig) => {
+        const colors = { TA:'#f0b45a', CC:'#5a9af0', LR:'#c05af0', GRA:'#f05a5a' };
+        const color = colors[type] || '#f0b45a';
+        return `<span style="background:rgba(240,180,90,.12);border-bottom:2px solid ${color}" title="[${type}] → ${fix}"><span style="text-decoration:line-through;opacity:.6">${orig}</span> <span style="color:${color};font-size:.85em">→ ${fix}</span></span>`;
+      })
+      .replace(/&lt;good&gt;(.*?)&lt;\/good&gt;/gs, '<span style="background:rgba(200,240,90,.15);border-bottom:2px solid var(--accent)">$1</span>');
+
+    annotatedHtml = `
+    <div class="detail-box" style="margin-bottom:1rem">
+      <h4>📝 Bài viết đã chữa</h4>
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:.75rem;display:flex;gap:1.2rem;flex-wrap:wrap">
+        <span>🟡 <span style="color:#f0b45a">TA</span></span>
+        <span>🔵 <span style="color:#5a9af0">CC</span></span>
+        <span>🟣 <span style="color:#c05af0">LR</span></span>
+        <span>🔴 <span style="color:#f05a5a">GRA</span></span>
+        <span>🟢 <span style="color:var(--accent)">Tốt</span></span>
+      </div>
+      <div style="font-size:.88rem;line-height:2;white-space:pre-wrap">${annotated}</div>
+    </div>`;
+  }
+
   document.getElementById('resultsPanel').innerHTML = `
     <div class="sec-header" style="margin-bottom:1.3rem">
       <span class="tag ${isS?'tag-s':'tag-w'}">${isS?'Speaking':'Writing'}</span>
@@ -1058,6 +1098,8 @@ function renderResults(r, type) {
     </div>
 
     <div class="crit-grid">${critCards}</div>
+
+    ${annotatedHtml}
 
     ${imps?`<div class="detail-box"><h4>🎯 Cần làm để lên band tiếp theo</h4>${imps}</div>`:''}
 
