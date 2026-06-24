@@ -558,6 +558,7 @@ const S = {
     div.className = 'prompt-item';
     div.id = 'wi-' + p.id;
     div.onclick = () => selectWriting(p.id);
+    div.ondblclick = () => { selectWriting(p.id); startWriting(); };
     div.innerHTML = `
       <div class="prompt-num">${p.task} &nbsp;·&nbsp; #${i+1}</div>
       <div class="prompt-title">${p.title}</div>
@@ -572,6 +573,7 @@ const S = {
     div.className = 'prompt-item';
     div.id = 'si-' + p.id;
     div.onclick = () => selectSpeaking(p.id);
+    div.ondblclick = () => { selectSpeaking(p.id); startSpeaking(); };
     div.innerHTML = `
       <div class="prompt-num">${p.part} &nbsp;·&nbsp; #${i+1}</div>
       <div class="prompt-title">${p.title}</div>
@@ -647,6 +649,7 @@ function applyFilter(type, taskPart, category) {
         div.className = 'prompt-item';
         div.id = 'wi-' + p.id;
         div.onclick = () => selectWriting(p.id);
+        div.ondblclick = () => { selectWriting(p.id); startWriting(); };
         div.innerHTML = `
           <div class="prompt-num">${p.task} · ${p.category} · #${i+1}</div>
           <div class="prompt-title">${p.title}</div>
@@ -672,6 +675,7 @@ function applyFilter(type, taskPart, category) {
         div.className = 'prompt-item';
         div.id = 'si-' + p.id;
         div.onclick = () => selectSpeaking(p.id);
+        div.ondblclick = () => { selectSpeaking(p.id); startSpeaking(); };
         div.innerHTML = `
           <div class="prompt-num">${p.part} · ${p.category} · #${i+1}</div>
           <div class="prompt-title">${p.title}</div>
