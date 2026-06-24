@@ -942,7 +942,9 @@ async function submitWriting() {
   } catch(e) {
     hideOverlay();
     errEl.style.display = 'block';
-    errEl.textContent = 'Lỗi: ' + e.message;
+    errEl.textContent = 'Lỗi chấm bài: ' + e.message + ' — Bài làm của bạn đã được lưu, vui lòng báo giáo viên hoặc thử lại sau.';
+    // Lưu bài làm thô ngay cả khi chấm lỗi
+    await saveRawSubmission('writing', answer, S.selectedWriting?.title, e.message);
   }
 }
 
@@ -959,7 +961,47 @@ async function submitSpeaking() {
   } catch(e) {
     hideOverlay();
     errEl.style.display = 'block';
-    errEl.textContent = 'Lỗi: ' + e.message;
+    errEl.textContent = 'Lỗi chấm bài: ' + e.message + ' — Bài ghi âm của bạn đã được lưu, vui lòng báo giáo viên hoặc thử lại sau.';
+    // Lưu transcript + audio ngay cả khi chấm lỗi
+    await saveRawSubmission('speaking', tx, S.selectedSpeaking?.title, e.message);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// LƯU BÀI LÀM KHI CHẤM LỖI (không có điểm)
+// ══════════════════════════════════════════════════════
+async function saveRawSubmission(type, content, promptTitle, errorMsg) {
+  let audioUrl = '';
+  if (type === 'speaking' && S.audioBlob) {
+    try {
+      const filename = `${S.name}_speaking_FAILED_${Date.now()}.webm`;
+      audioUrl = await uploadAudio(S.audioBlob, filename);
+    } catch(_) {}
+  }
+
+  const payload = {
+    timestamp:    new Date().toLocaleString('vi-VN'),
+    name:         S.name,
+    class_code:   S.classCode,
+    type:         (type === 'writing' ? 'Writing' : 'Speaking') + ' [CHẤM LỖI]',
+    prompt_title: promptTitle || '',
+    essay:        content.substring(0, 5000),
+    overall_band: '',
+    cr1: '', cc: '', lr: '', gra: '',
+    feedback:     'Lỗi chấm bài: ' + errorMsg,
+    audio_url:    audioUrl,
+  };
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method:  'POST',
+      mode:    'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+  } catch(_) {
+    // Nếu cả lưu Sheet cũng lỗi, lưu local để không mất bài
+    localStorage.setItem(`ielts_FAILED_${S.name}_${type}_${Date.now()}`, JSON.stringify(payload));
   }
 }
 
